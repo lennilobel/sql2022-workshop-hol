@@ -118,3 +118,151 @@ INNER JOIN
 INNER JOIN 
     Customer c ON so.CustomerId = c.CustomerId
 ```
+Let's create a comprehensive guide for these examples.
+
+---
+
+### DATE_BUCKET Function Exploration
+
+SQL Server 2022 introduces the `DATE_BUCKET` function, enhancing the way we can aggregate and analyze data over time. Below, we'll explore how to use this function to create various day-level buckets.
+
+#### Two-day Bucket
+
+**Objective:** Group data into two-day intervals, starting from a specified "origin" date. This approach helps in analyzing data trends over every two days.
+
+```sql
+DECLARE @Origin date = '2022-01-01';
+SELECT
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-01'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-02'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-03'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-04'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-05'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-06'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-07'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-08'), @Origin);
+GO
+```
+**Insight:** This code demonstrates grouping dates into two-day buckets. The bucket number alternates between '1/2d' and '2/2d', indicating the division of days into two-day periods based on the provided origin date.
+
+#### Adjusting the Origin Date
+
+**Objective:** Understand the impact of changing the origin date on the bucketing outcome.
+
+```sql
+DECLARE @Origin date = '2021-12-31';
+SELECT
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-01'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-02'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-03'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-04'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-05'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-06'), @Origin),
+    '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-07'), @Origin),
+    '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-08'), @Origin);
+GO
+```
+**Insight:** Shifting the origin date backwards by a day changes how dates are allocated into two-day buckets. This flexibility allows for tailored data analysis based on the starting point of the bucketing interval.
+
+#### Three-day Bucket
+
+**Objective:** Extend the bucketing concept to three-day intervals for more extensive data aggregation.
+
+```sql
+DECLARE @Origin date = '2022-01-01';
+SELECT
+    '1/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-01'), @Origin),
+    '2/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-02'), @Origin),
+    '3/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-03'), @Origin),
+    '1/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-04'), @Origin),
+    '2/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-05'), @Origin),
+    '3/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-06'), @Origin),
+    '1/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-07'), @Origin),
+    '2/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-08'), @Origin);
+GO
+```
+**Insight:** By grouping dates into three-day intervals, we can observe patterns or trends over slightly longer periods, providing a broader analysis window than daily or two-day buckets. This method could be particularly useful for datasets where changes occur over several days rather than from one day to the next.
+
+#### Four-day Bucket
+
+**Objective:** Further explore the flexibility of `DATE_BUCKET` by creating four-day intervals, offering an even wider lens for data aggregation and analysis.
+
+```sql
+DECLARE @Origin date = '2022-01-01';
+SELECT
+    '1/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-01'), @Origin),
+    '2/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-02'), @Origin),
+    '3/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-03'), @Origin),
+    '4/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-04'), @Origin),
+    '1/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-05'), @Origin),
+    '2/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-06'), @Origin),
+    '3/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-07'), @Origin),
+    '4/4d' = DATE_BUCKET(DAY, 4, CONVERT(date, '2022-01-08'), @Origin);
+GO
+```
+
+**Insight:** This setup demonstrates how to segment data into four-day buckets, showcasing `DATE_BUCKET`'s utility in grouping dates over various intervals. It's particularly helpful for analyzing data trends that unfold over an extended period, providing a comprehensive view of week-long trends or activities.
+
+By utilizing the `DATE_BUCKET` function across different day-level intervals, we gain a powerful tool for temporal data analysis, allowing us to customize our approach based on the specific needs of the analysis or the inherent patterns within the data.
+
+Let's continue with this approach if you have more specific intervals or examples you'd like to explore.
+
+Let's continue with the detailed breakdown, starting with the one-week bucket example and moving through to the three-month bucket example.
+
+---
+
+#### One-week Bucket
+
+**Objective:** Understand how to group dates into one-week intervals, demonstrating the use of `DATE_BUCKET` for weekly data analysis.
+
+```sql
+DECLARE @Origin date = '2022-01-01';
+SELECT
+    '1/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-01'), @Origin),
+    '2/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-02'), @Origin),
+    '3/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-03'), @Origin),
+    '4/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-04'), @Origin),
+    '5/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-05'), @Origin),
+    '6/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-06'), @Origin),
+    '7/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-07'), @Origin),
+    '1/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-08'), @Origin);
+GO
+```
+**Insight:** This example showcases how `DATE_BUCKET` can effectively group dates by week, providing a clear way to analyze data on a weekly basis. The output demonstrates the assignment of each day to its respective week number relative to the `@Origin`.
+
+#### One-month Bucket
+
+**Objective:** Learn to group dates into one-month intervals using `DATE_BUCKET`, ideal for monthly data aggregation and trend analysis.
+
+```sql
+DECLARE @Origin date = '2022-01-01';
+SELECT
+    'Jan/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-01-15'), @Origin),
+    'Feb/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-02-20'), @Origin),
+    'Mar/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-03-13'), @Origin),
+    'Apr/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-04-01'), @Origin),
+    'May/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-05-23'), @Origin),
+    'Jun/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-06-30'), @Origin),
+    'Jul/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-07-15'), @Origin),
+    'Aug/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-08-30'), @Origin);
+GO
+```
+**Insight:** This snippet demonstrates the utility of `DATE_BUCKET` in monthly data grouping. By specifying a month interval, it aligns each date within its respective month bucket, offering a streamlined approach for monthly reporting or analysis.
+
+#### Three-month Bucket
+
+**Objective:** Explore the capability of `DATE_BUCKET` to group dates into three-month (quarterly) intervals, aiding in quarterly data comparison and trend identification.
+
+```sql
+DECLARE @Origin date = '2022-01-01';
+SELECT
+    'Jan/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-01-15'), @Origin),
+    'Feb/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-02-20'), @Origin),
+    'Mar/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-03-13'), @Origin),
+    'Apr/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-04-01'), @Origin),
+    'May/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-05-23'), @Origin),
+    'Jun/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-06-30'), @Origin),
+    'Jul/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-07-15'), @Origin),
+    'Aug/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-08-30'), @Origin);
+GO
+```
