@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AEClient", "3. Security\Always Encrypted\AEClient\AEClient.csproj", "{59594AB4-9166-4807-B8F5-6E87BDE6BF5F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RLSClient", "3. Security\Row Level Security\RLSClient\RLSClient.csproj", "{C1EAE295-F85A-4CB0-95BC-2AF47A454D09}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{59594AB4-9166-4807-B8F5-6E87BDE6BF5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59594AB4-9166-4807-B8F5-6E87BDE6BF5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59594AB4-9166-4807-B8F5-6E87BDE6BF5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59594AB4-9166-4807-B8F5-6E87BDE6BF5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1EAE295-F85A-4CB0-95BC-2AF47A454D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1EAE295-F85A-4CB0-95BC-2AF47A454D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1EAE295-F85A-4CB0-95BC-2AF47A454D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1EAE295-F85A-4CB0-95BC-2AF47A454D09}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {875EDF48-533B-4143-B7E5-38ABDE9F58C4}
+	EndGlobalSection
+EndGlobal
