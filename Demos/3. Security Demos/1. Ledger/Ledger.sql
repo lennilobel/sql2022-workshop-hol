@@ -178,20 +178,17 @@ FROM
 WHERE
 	t.ledger_view_id IS NOT NULL
 
--- Create a row
 INSERT INTO Balance VALUES
  (1, 'Jones', 'Nick', 50)
 
--- {"database_name":"LedgerDemo","block_id":4,"hash":"0x3FFAEC703AF66D8C04A7ECFC37895C8EF311F561B7B0A09F0487A50E9C7BAA98","last_transaction_commit_time":"2022-06-03T14:15:16.5133333","digest_time":"2022-06-03T14:15:21.2682202"}
 EXEC sys.sp_generate_database_ledger_digest
 
--- Create three more rows
+
 INSERT INTO Balance VALUES
  (2, 'Smith', 'John', 500),
  (3, 'Smith', 'Joe', 30),
  (4, 'Michaels', 'Mary', 200)
 
--- {"database_name":"LedgerDemo","block_id":5,"hash":"0x0CCCD575CE2902DD38D82ECE3C113BF441609BD31E1A6ACD1BEEF904D14070C0","last_transaction_commit_time":"2022-06-03T14:16:23.4300000","digest_time":"2022-06-03T14:16:25.1812430"}
 EXEC sys.sp_generate_database_ledger_digest
 
 -- Hidden ledger table columns ledger_start_transaction_id and ledger_start_sequence_number groups each transaction (note Nick's values 1041/0)
