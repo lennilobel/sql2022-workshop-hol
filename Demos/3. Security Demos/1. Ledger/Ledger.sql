@@ -120,6 +120,17 @@ GO
 -- Updateable ledger tables
 --  https://docs.microsoft.com/en-us/sql/relational-databases/security/ledger/ledger-how-to-updatable-ledger-tables
 
+CREATE TABLE KeyCardEvent (
+	EmployeeId int NOT NULL,
+	Operation varchar(1024) NOT NULL,
+	CreatedAt datetime2 NOT NULL
+)
+WITH (
+	LEDGER = ON (
+		APPEND_ONLY = ON
+	)
+)
+
 CREATE TABLE Balance (
     CustomerId int NOT NULL PRIMARY KEY CLUSTERED,
     LastName varchar(50) NOT NULL,
@@ -205,7 +216,7 @@ FROM
 UPDATE Balance SET Balance = 100
 	WHERE CustomerId = 1
 
--- {"database_name":"LedgerDemo","block_id":6,"hash":"0x2628CAA7BFE536EFFD49EA5CE4E69D5A345EB88A8E9F7E158FCBAEB496874169","last_transaction_commit_time":"2022-06-03T14:17:18.8566667","digest_time":"2022-06-03T14:17:21.1946204"}
+-- Observe the incremented digest block ID
 EXEC sys.sp_generate_database_ledger_digest
 
 -- Note Nick's ledger_start_transaction_id changed
@@ -225,7 +236,7 @@ SELECT * FROM Balance_History
 UPDATE Balance SET Balance = 150
 	WHERE CustomerId = 1
 
--- {"database_name":"LedgerDemo","block_id":7,"hash":"0xA961C3DC781CCA04EC92B1F5CF1374000614F37C89D2EA241ADDAE9638F692F5","last_transaction_commit_time":"2022-06-03T14:18:51.1033333","digest_time":"2022-06-03T14:18:52.8176210"}
+-- Observe the incremented digest block ID
 EXEC sys.sp_generate_database_ledger_digest
 
 -- Note Nick's ledger_start_transaction_id changed again
@@ -292,15 +303,20 @@ GO
 -- Needs snapshot isolation to verify the database ledger
 EXEC sp_verify_database_ledger N'The digest JSON'
 
+
+
+
+-- Get the current database digest
+EXEC sp_generate_database_ledger_digest
+
+
+select * from sys.tables
+
 -- Enable snapshot isolation
 ALTER DATABASE LedgerDemo SET ALLOW_SNAPSHOT_ISOLATION ON
 
--- Needs valid digest JSON to verify the database ledger
-EXEC sp_verify_database_ledger N'The digest JSON'
-
-EXEC sp_generate_database_ledger_digest
-
-EXEC sp_verify_database_ledger N'{"database_name":"LedgerDemo","block_id":7,"hash":"0xDE38671E7EE8F0E4E9056FA7D7754555102EF811F798825F0EB82B5A62926850","last_transaction_commit_time":"2024-03-06T08:20:35.9100000","digest_time":"2024-03-06T13:24:03.4176322"}'
+-- Verify it
+EXEC sp_verify_database_ledger N'<paste-in-the-digest-json-here>'
 
 -- Tamper with the data using the HxD disk editor
 USE master
@@ -371,3 +387,5 @@ USE master
 GO
 DROP DATABASE LedgerDemo
 GO
+select * from sys.tables
+
