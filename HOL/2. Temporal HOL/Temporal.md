@@ -1,4 +1,6 @@
-﻿**Creating a Temporal Table with a Custom History Table Name in SQL Server**
+﻿## Temporal Tables
+
+**Creating a Temporal Table with a Custom History Table Name in SQL Server**
 
 Temporal tables, introduced in SQL Server 2016, enable SQL Server to automatically manage historical data. These tables include two specifically defined columns, the `ValidFrom` and `ValidTo` fields, which SQL Server populates to track when each row is valid in time. This feature is particularly useful for maintaining an auditable history of data changes over time.
 
