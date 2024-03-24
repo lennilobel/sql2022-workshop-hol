@@ -1,4 +1,4 @@
-### Hands-On Lab Setup: SQL Server 2022 and Development Tools
+# Hands-On Lab Setup: SQL Server 2022 and Development Tools
 
 Before diving into the hands-on labs for learning new features in SQL Server 2022, ensure you have the necessary software and databases installed. Follow these steps to set up your environment:
 
