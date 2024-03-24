@@ -120,17 +120,6 @@ GO
 -- Updateable ledger tables
 --  https://docs.microsoft.com/en-us/sql/relational-databases/security/ledger/ledger-how-to-updatable-ledger-tables
 
-CREATE TABLE KeyCardEvent (
-	EmployeeId int NOT NULL,
-	Operation varchar(1024) NOT NULL,
-	CreatedAt datetime2 NOT NULL
-)
-WITH (
-	LEDGER = ON (
-		APPEND_ONLY = ON
-	)
-)
-
 CREATE TABLE Balance (
     CustomerId int NOT NULL PRIMARY KEY CLUSTERED,
     LastName varchar(50) NOT NULL,
@@ -189,17 +178,20 @@ FROM
 WHERE
 	t.ledger_view_id IS NOT NULL
 
+-- Create a row
 INSERT INTO Balance VALUES
  (1, 'Jones', 'Nick', 50)
 
+-- {"database_name":"LedgerDemo","block_id":4,"hash":"0x3FFAEC703AF66D8C04A7ECFC37895C8EF311F561B7B0A09F0487A50E9C7BAA98","last_transaction_commit_time":"2022-06-03T14:15:16.5133333","digest_time":"2022-06-03T14:15:21.2682202"}
 EXEC sys.sp_generate_database_ledger_digest
 
-
+-- Create three more rows
 INSERT INTO Balance VALUES
  (2, 'Smith', 'John', 500),
  (3, 'Smith', 'Joe', 30),
  (4, 'Michaels', 'Mary', 200)
 
+-- {"database_name":"LedgerDemo","block_id":5,"hash":"0x0CCCD575CE2902DD38D82ECE3C113BF441609BD31E1A6ACD1BEEF904D14070C0","last_transaction_commit_time":"2022-06-03T14:16:23.4300000","digest_time":"2022-06-03T14:16:25.1812430"}
 EXEC sys.sp_generate_database_ledger_digest
 
 -- Hidden ledger table columns ledger_start_transaction_id and ledger_start_sequence_number groups each transaction (note Nick's values 1041/0)
@@ -216,7 +208,7 @@ FROM
 UPDATE Balance SET Balance = 100
 	WHERE CustomerId = 1
 
--- Observe the incremented digest block ID
+-- {"database_name":"LedgerDemo","block_id":6,"hash":"0x2628CAA7BFE536EFFD49EA5CE4E69D5A345EB88A8E9F7E158FCBAEB496874169","last_transaction_commit_time":"2022-06-03T14:17:18.8566667","digest_time":"2022-06-03T14:17:21.1946204"}
 EXEC sys.sp_generate_database_ledger_digest
 
 -- Note Nick's ledger_start_transaction_id changed
@@ -236,7 +228,7 @@ SELECT * FROM Balance_History
 UPDATE Balance SET Balance = 150
 	WHERE CustomerId = 1
 
--- Observe the incremented digest block ID
+-- {"database_name":"LedgerDemo","block_id":7,"hash":"0xA961C3DC781CCA04EC92B1F5CF1374000614F37C89D2EA241ADDAE9638F692F5","last_transaction_commit_time":"2022-06-03T14:18:51.1033333","digest_time":"2022-06-03T14:18:52.8176210"}
 EXEC sys.sp_generate_database_ledger_digest
 
 -- Note Nick's ledger_start_transaction_id changed again
@@ -303,20 +295,15 @@ GO
 -- Needs snapshot isolation to verify the database ledger
 EXEC sp_verify_database_ledger N'The digest JSON'
 
-
-
-
--- Get the current database digest
-EXEC sp_generate_database_ledger_digest
-
-
-select * from sys.tables
-
 -- Enable snapshot isolation
 ALTER DATABASE LedgerDemo SET ALLOW_SNAPSHOT_ISOLATION ON
 
--- Verify it
-EXEC sp_verify_database_ledger N'<paste-in-the-digest-json-here>'
+-- Needs valid digest JSON to verify the database ledger
+EXEC sp_verify_database_ledger N'The digest JSON'
+
+EXEC sp_generate_database_ledger_digest
+
+EXEC sp_verify_database_ledger N'{"database_name":"LedgerDemo","block_id":7,"hash":"0xDE38671E7EE8F0E4E9056FA7D7754555102EF811F798825F0EB82B5A62926850","last_transaction_commit_time":"2024-03-06T08:20:35.9100000","digest_time":"2024-03-06T13:24:03.4176322"}'
 
 -- Tamper with the data using the HxD disk editor
 USE master
@@ -387,5 +374,3 @@ USE master
 GO
 DROP DATABASE LedgerDemo
 GO
-select * from sys.tables
-
