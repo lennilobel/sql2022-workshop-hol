@@ -13,8 +13,8 @@ DROP TABLE IF EXISTS TxnData
 CREATE TABLE TxnData (AcctId int, TxnDate date, Amount decimal)
 
 INSERT INTO TxnData (AcctId, TxnDate, Amount) VALUES
-  (1, DATEFROMPARTS(2011, 8, 10), 500),  -- 5 transactions for acct 1
-  (1, DATEFROMPARTS(2011, 8, 22), 250),
+  (1, DATEFROMPARTS(2021, 8, 10), 500),  -- 5 transactions for acct 1
+  (1, DATEFROMPARTS(2021, 8, 22), 250),
   (1, DATEFROMPARTS(2011, 8, 24), 75),
   (1, DATEFROMPARTS(2011, 8, 26), 125),
   (1, DATEFROMPARTS(2011, 8, 28), 175),
@@ -90,63 +90,69 @@ GO
 
 -- SQL 2022 enhances FIRST_VALUE and LAST_VALUE with IGNORE NULLS and RESPECT NULLS (default)
 
-CREATE TABLE [Order](OrderDate date, ProductID int, Quantity int)
-INSERT INTO [Order] VALUES
- ('2011-03-18', 142, 74),
- ('2011-04-11', 123, 95),
- ('2011-04-12', 101, 38),
- ('2011-05-30', 101, 28),
- ('2011-05-21', 130, 12),
- ('2011-07-25', 123, 57),
- ('2011-07-28', 101, 12)
+CREATE TABLE StockByDate (
+  StockDate date,
+  ProductID int,
+  Quantity int
+)
+
+INSERT INTO StockByDate
+ (StockDate,     ProductID,   Quantity) VALUES
+ ('2021-03-18',  142,         74),
+ ('2021-04-11',  123,         95),	-- Product 123's highest quantity stock date is 4/11/2021
+ ('2021-04-12',  101,         38),
+ ('2021-05-30',  101,         28),
+ ('2021-05-21',  130,         12),
+ ('2021-07-25',  123,         57),
+ ('2021-07-28',  101,         12)	-- Product 101's lowest quantity stock date is 7/28/2021
 
 SELECT
-  OrderDate,
+  StockDate,
   ProductID,
   Quantity,
-  LowestOn  = FIRST_VALUE(OrderDate) OVER win,
-  HighestOn = LAST_VALUE(OrderDate)  OVER win
- FROM [Order]
+  LowestOn  = FIRST_VALUE(StockDate) OVER win,
+  HighestOn = LAST_VALUE(StockDate)  OVER win
+ FROM StockByDate
  WINDOW win AS (PARTITION BY ProductID ORDER BY Quantity ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
- ORDER BY OrderDate		-- switch to ProductID to sort results the same as the internal window order
+ ORDER BY StockDate		-- switch to ProductID to sort results the same as the internal window order
 
 -- But it's a problem if you have NULLs:
-DELETE FROM [Order]
-INSERT INTO [Order] VALUES
- ('2011-03-18', 142, 74),
- (NULL,			123, 95),	-- HighestOn (95) for ProductID 123 is NULL
- ('2011-04-12', 101, 38),
- ('2011-05-30', 101, 28),
- ('2011-05-21', 130, 12),
- ('2011-07-25', 123, 57),
- (NULL,			101, 12)	-- LowestOn (12) for ProductID 101 is NULL
+DELETE FROM StockByDate
+INSERT INTO StockByDate
+ (StockDate,     ProductID,   Quantity) VALUES
+ ('2021-03-18',  142,         74),
+ (NULL,          123,         95),	-- Product 123's highest quantity stock date is NULL
+ ('2021-04-12',  101,         38),
+ ('2021-05-30',  101,         28),
+ ('2021-05-21',  130,         12),
+ ('2021-07-25',  123,         57),
+ (NULL,          101,         12)	-- Product 101's lowest quantity stock date is NULL
 
 -- Default is RESPECT NULLS, which gives us NULL order dates for ProductID 101 LowestOn, and for ProductID 123 HighestOn
 SELECT
-  OrderDate,
+  StockDate,
   ProductID,
   Quantity,
-  LowestOn  = FIRST_VALUE(OrderDate) OVER win,
-  HighestOn = LAST_VALUE(OrderDate)  OVER win
- FROM [Order]
+  LowestOn  = FIRST_VALUE(StockDate) OVER win,
+  HighestOn = LAST_VALUE(StockDate)  OVER win
+ FROM StockByDate
  WINDOW win AS (PARTITION BY ProductID ORDER BY Quantity ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
- ORDER BY OrderDate		-- switch to ProductID to sort results the same as the internal window order
+ ORDER BY StockDate		-- switch to ProductID to sort results the same as the internal window order
 
 -- With IGNORE NULLS, we get meaningful (non-NULL) order dates for each product
 SELECT
-  OrderDate,
+  StockDate,
   ProductID,
   Quantity,
-  LowestOn  = FIRST_VALUE(OrderDate) IGNORE NULLS OVER win,
-  HighestOn = LAST_VALUE(OrderDate)  IGNORE NULLS OVER win
- FROM [Order]
+  LowestOn  = FIRST_VALUE(StockDate) IGNORE NULLS OVER win,
+  HighestOn = LAST_VALUE(StockDate)  IGNORE NULLS OVER win
+ FROM StockByDate
  WINDOW win AS (PARTITION BY ProductID ORDER BY Quantity ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
- ORDER BY ProductID --OrderDate		-- switch to ProductID to sort results the same as the internal window order
+ ORDER BY ProductID --StockDate		-- switch to ProductID to sort results the same as the internal window order
 
 GO
 
 -- Cleanup
 DROP TABLE IF EXISTS TxnData
-DROP TABLE IF EXISTS [Order]
-DROP TABLE IF EXISTS Sales
+DROP TABLE IF EXISTS StockByDate
 GO
