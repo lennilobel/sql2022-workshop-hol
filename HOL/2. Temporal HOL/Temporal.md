@@ -1,12 +1,10 @@
 ﻿## Temporal Tables
 
-**Creating a Temporal Table with a Custom History Table Name in SQL Server**
-
 Temporal tables, introduced in SQL Server 2016, enable SQL Server to automatically manage historical data. These tables include two specifically defined columns, the "period" columns, which SQL Server populates to track when each row is valid in time. This feature is particularly useful for maintaining an auditable history of data changes over time.
 
 In this demonstration, we will create a new temporal table named `Employee` and define a custom history table called `EmployeeHistory`. The `WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory))` clause specifies that system versioning is enabled for the table and designates `EmployeeHistory` as the history table.
 
-### Creating the Temporal Table
+### Creating a Temporal Table
 
 ```sql
 CREATE TABLE Employee
@@ -50,7 +48,7 @@ WHERE
 
 This query returns information about the temporal table and its history table, including the `object_id` and the `name` of each table, as well as their `temporal_type_desc` which indicates whether the table is a history table or the main table.
 
-### Cleanup
+### Deleting a Temporal Table
 
 To clean up and remove the temporal table and its history table, it's necessary to first "decouple" them by turning off system versioning:
 
