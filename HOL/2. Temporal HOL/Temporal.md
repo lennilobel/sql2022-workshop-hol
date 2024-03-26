@@ -2,7 +2,7 @@
 
 **Creating a Temporal Table with a Custom History Table Name in SQL Server**
 
-Temporal tables, introduced in SQL Server 2016, enable SQL Server to automatically manage historical data. These tables include two specifically defined columns, the `ValidFrom` and `ValidTo` fields, which SQL Server populates to track when each row is valid in time. This feature is particularly useful for maintaining an auditable history of data changes over time.
+Temporal tables, introduced in SQL Server 2016, enable SQL Server to automatically manage historical data. These tables include two specifically defined columns, the "period" columns, which SQL Server populates to track when each row is valid in time. This feature is particularly useful for maintaining an auditable history of data changes over time.
 
 In this demonstration, we will create a new temporal table named `Employee` and define a custom history table called `EmployeeHistory`. The `WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory))` clause specifies that system versioning is enabled for the table and designates `EmployeeHistory` as the history table.
 
@@ -20,14 +20,15 @@ CREATE TABLE Employee
     PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)
 )
 WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory))
-GO
 ```
 
-In this code, the `PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)` clause identifies the `ValidFrom` and `ValidTo` columns as special columns used by SQL Server to manage the row's validity period. The `SYSTEM_VERSIONING = ON` option enables versioning for the table, with changes being tracked in the specified history table `EmployeeHistory`.
+In this code, the `PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)` clause identifies the `ValidFrom` and `ValidTo` columns as the special period columns used by SQL Server to manage the row's validity period. The `SYSTEM_VERSIONING = ON` option enables versioning for the table, with changes being tracked in the specified history table `EmployeeHistory`.
 
 ### Discovering Temporal and History Tables
 
-To view the temporal table and its associated history table, you can query the `sys.tables` system view:
+Refresh to Object Explorer in SQL Server Management Studio. Note how temporal tables are designated with a special icon, and their associated history tables appear nested beneath them in the tree view.
+
+To view the temporal table and its associated history table in T-SQL, you can query the `sys.tables` system view:
 
 ```sql
 SELECT
@@ -45,10 +46,9 @@ WHERE
         FROM sys.tables
         WHERE object_id = OBJECT_ID('dbo.Employee', 'U')
 )
-GO
 ```
 
-This query returns information about the temporal table and its history table, including the `object_id` and the `name` of each table, as well as their `temporal_type_desc` which indicates whether the table is a history table or the current table.
+This query returns information about the temporal table and its history table, including the `object_id` and the `name` of each table, as well as their `temporal_type_desc` which indicates whether the table is a history table or the main table.
 
 ### Cleanup
 
@@ -58,7 +58,6 @@ To clean up and remove the temporal table and its history table, it's necessary 
 ALTER TABLE Employee SET (SYSTEM_VERSIONING = OFF)
 DROP TABLE Employee
 DROP TABLE EmployeeHistory
-GO
 ```
 
 The `ALTER TABLE Employee SET (SYSTEM_VERSIONING = OFF)` statement disables system versioning for the `Employee` table, effectively decoupling it from its history table. This allows both the current and history tables to be treated as ordinary (non-temporal) tables, making it possible to delete them. This step is required because direct deletion of a system-versioned temporal table without first disabling system versioning would result in an error.
@@ -80,7 +79,6 @@ CREATE TABLE Employee
     LastName        varchar(20) NOT NULL,
     DepartmentName  varchar(50) NOT NULL
 )
-GO
 
 INSERT INTO Employee VALUES
  (1, 'Ken',     'Sanchez',       'Executive'),
@@ -89,14 +87,13 @@ INSERT INTO Employee VALUES
  (4, 'Rob',     'Walters',       'Engineering'),
  (5, 'Gail',    'Erickson',      'Engineering'),
  (6, 'Jossef',  'Goldberg',      'Engineering')
-GO
 
 SELECT * FROM Employee
 ```
 
 This step focuses on establishing the `Employee` table and inserting six records into it. These records represent the employees at their current state. Given that the table is not yet a temporal table, any changes made to the employee records up to this point have not been recorded, meaning there is no historical data available for these records. This absence of historical data will change once we convert this table into a temporal table, allowing us to track all future modifications to the employee records.
 
-#### Step 1: Execute two ALTER TABLE Statements
+#### Step 2: Execute two ALTER TABLE Statements
 
 
 
@@ -111,16 +108,16 @@ ALTER TABLE Employee ADD
     ValidFrom datetime2 GENERATED ALWAYS AS ROW START NOT NULL DEFAULT CAST('1900-01-01 00:00:00.0000000' AS datetime2),
     ValidTo   datetime2 GENERATED ALWAYS AS ROW END   NOT NULL DEFAULT CAST('9999-12-31 23:59:59.9999999' AS datetime2),
     PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)
-GO
 ```
 
-2. **Enabling System Versioning**: The next step involves enabling system versioning on the table, which turns it into a temporal table. This action automatically creates a history table (in this case, `dbo.EmployeeHistory`) with an identical schema to store the historical data. The history table's name can be specified explicitly. This step requires the table to have a primary key and defined system-time period columns.
+2. **Enabling System Versioning**: The next step involves enabling system versioning on the table, which turns it into a temporal table. This action automatically creates a history table (in this case, `dbo.EmployeeHistory`) with an identical schema to store the historical data. The history table's name should be specified explicitly, or it will be named by default after the table's internal object ID, which is awkward and unintuitive. This step requires the table to have a primary key and defined system-time period columns.
 
 ```sql
 ALTER TABLE Employee 
     SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory))
-GO
 ```
+
+Refresh the Object Explorer in SSMS and note how the `Employee` table is now designated as a temporal table, and is coupled with an `EmployeeHistory` table which appears nested beneath it.
 
 At this point, the history table (`EmployeeHistory`) starts out empty because no changes have been made to the `Employee` table yet. Here are two queries to demonstrate this:
 
@@ -154,15 +151,15 @@ UPDATE Employee SET DepartmentName = 'Executive' WHERE EmployeeId = 5
 WAITFOR DELAY '00:00:02'
 -- Now delete employee ID 2
 DELETE Employee WHERE EmployeeId = 2
-GO
 
 -- History table shows the changes
 SELECT * FROM Employee
 SELECT * FROM EmployeeHistory ORDER BY EmployeeId, ValidFrom
-GO
 ```
 
-In the history table, we observe the following for Employee ID 5:
+The main table shows that Employee ID 2 is deleted, and reflects the latest changes for Employee ID 5.
+
+In the history table, we observe the following:
 
 - Three previous versions of the employee record are preserved, each reflecting the changes made with each update statement. These versions showcase changes to both the `FirstName` and `DepartmentName` attributes.
 - The `ValidFrom` and `ValidTo` columns demarcate the exact time frame for which each version of the record was valid. Importantly, these time frames align seamlessly, ensuring there are no gaps or overlaps between consecutive versions. This seamless alignment is critical for accurately representing the history of data changes.
@@ -176,12 +173,10 @@ Now let's cleanup once more, and delete the Employee table along with the histor
 ```sql
 -- Disable SYSTEM_VERSIONING before cleanup
 ALTER TABLE Employee SET (SYSTEM_VERSIONING = OFF)
-GO
 
 -- Cleanup: drop the tables
 DROP TABLE Employee
 DROP TABLE EmployeeHistory
-GO
 ```
 
 Remember, disabling `SYSTEM_VERSIONING` decouples the temporal table from its history table, allowing you to manage them as separate, ordinary tables. This step is crucial before deleting temporal tables and their associated history tables, as SQL Server enforces the relationship between them while `SYSTEM_VERSIONING` is enabled.
@@ -221,7 +216,7 @@ CREATE TABLE EmployeeHistory
 )
 ```
 
-Both tables are then populated:
+Both tables are then populated to reflect the same data and changes we saw in the previous demo, except that the gaps in time between changes are being artificially set to longer periods of time than just two seconds.
 
 ```sql
 INSERT INTO Employee VALUES
@@ -238,9 +233,15 @@ INSERT INTO EmployeeHistory VALUES
  (5, 'Gail',       'Erickson',      'Engineering',  '2018-10-07 08:33:00', '2018-11-01 11:59:00')
 ```
 
-Noticeably, Employee ID 2 is absent from the **Employee** table because it was deleted, and its record exists only within the **EmployeeHistory** table, marking its removal from the active data set.
+Noticeably, Employee ID 2 is absent from the **Employee** table because it was deleted, and its record exists only within the **EmployeeHistory** table, marking its removal from the active data set. Observe this by querying the tables:
 
-Conversion to a temporal table is then performed:
+```sql
+-- History table shows the changes
+SELECT * FROM Employee
+SELECT * FROM EmployeeHistory ORDER BY EmployeeId, ValidFrom
+```
+
+Now we'll couple the tables together to convert this to a temporal table:
 
 ```sql
 ALTER TABLE Employee
@@ -252,15 +253,7 @@ ALTER TABLE Employee SET (SYSTEM_VERSIONING = ON (
 )
 ```
 
-Subsequent examination shows the **Employee** table reflecting the current data state, while **EmployeeHistory** encapsulates the comprehensive change history:
-
-```sql
--- History table shows the changes
-SELECT * FROM Employee
-SELECT * FROM EmployeeHistory ORDER BY EmployeeId, ValidFrom
-```
-
-This detailed process underscores SQL Server's potent temporal table capabilities, ensuring each data record's life span is meticulously recorded. Through period columns `ValidFrom` and `ValidTo`, SQL Server affords a robust framework for managing and analyzing data changes over extended durations, highlighting its strengths in maintaining historical data integrity and traceability.
+This process underscores SQL Server's temporal table capabilities, ensuring each data record's life span is meticulously recorded. Through period columns `ValidFrom` and `ValidTo`, SQL Server affords a robust framework for managing and analyzing data changes over extended durations, highlighting its strengths in maintaining historical data integrity and traceability.
 
 
 
@@ -268,21 +261,21 @@ This detailed process underscores SQL Server's potent temporal table capabilitie
 
 ### Running Point-In-Time Queries
 
-Temporal queries in SQL Server enable us to navigate through time, showcasing a table's state at various historical points. These queries can be particularly insightful for auditing, data recovery, and historical analysis. Here's a breakdown of each query and its implications:
+Temporal queries in SQL Server enable us to navigate through time, revisiting a table's state at various times in the past. These queries can be particularly insightful for auditing, data recovery, and historical analysis. Here's a breakdown of each query and its implications:
 
 1. **Current Data Query**:
    - Retrieves the present state of the **Employee** table, showing current entries.
    ```sql
    SELECT * FROM Employee ORDER BY EmployeeId
    ```
-   This displays the latest information, such as "Gabriel Erickson" in the "Executive" department.
+   This displays the latest information, such as "Gabriel Erickson" in the "Executive" department, and no data for the deleted employee "Terri Duffy" (Employee ID 2).
 
 2. **Point-in-Time Query as of December 1, 2018**:
    - Fetches data as it existed on December 1, 2018, by merging current and historical data to reflect the table's state at that point.
    ```sql
    SELECT * FROM Employee FOR SYSTEM_TIME AS OF '2018-12-01' ORDER BY EmployeeId
    ```
-   This reveals "Gabriel Erickson" in the "Support" department, showcasing the department change before the latest update.
+   This reveals "Gabriel Erickson" in the "Support" department, which was the department change at that time. And we've still not queried far back enough in time to recover the deleted employee.
 
 3. **Point-in-Time Query as of November 15, 2018**:
    - Retrieves the table's state on November 15, 2018, including previously deleted or updated records.
@@ -303,7 +296,7 @@ Temporal queries in SQL Server enable us to navigate through time, showcasing a 
    ```sql
    SELECT * FROM Employee FOR SYSTEM_TIME AS OF '2018-10-01' ORDER BY EmployeeId
    ```
-   Results in no data, signifying that the table was empty or the records had not yet been created.
+   This results in no data, signifying that the table was empty or the records had not yet been created.
 
 Each query uses `FOR SYSTEM_TIME AS OF` to perform a temporal query, which SQL Server executes by combining the current table with its history table. This mechanism allows for an integrated view of the data at specified historical points, effectively making the database a time machine. By specifying different dates, we can observe the evolution of data, including updates, deletions, and the initial state before any modifications. This capability is invaluable for applications requiring an audit trail, historical data analysis, or undoing unintended changes.
 
@@ -317,21 +310,30 @@ This demo delves into the behavior of temporal queries when the specified point 
 1. **Identifying Boundary Cases**:
    - First, we examine the history table to identify rows with `ValidFrom` or `ValidTo` timestamps that precisely match a boundary condition. In this case, we're looking at '2018-11-18 04:26:00'.
    ```sql
-   SELECT * FROM EmployeeHistory WHERE ValidFrom = '2018-11-18 04:26:00' OR ValidTo = '2018-11-18 04:26:00' ORDER BY EmployeeId, ValidFrom
+   SELECT *
+     FROM EmployeeHistory
+     WHERE ValidFrom = '2018-11-18 04:26:00' OR ValidTo = '2018-11-18 04:26:00'
+     ORDER BY EmployeeId, ValidFrom
    ```
    This query finds two rows in the history table for Employee ID 5, where one row ends and another begins at the exact time of '2018-11-18 04:26:00'.
 
 2. **Querying at the Boundary Time**:
    - Running a point-in-time query exactly at the boundary (`'2018-11-18 04:26:00'`) demonstrates that SQL Server matches on the `ValidFrom` time, not `ValidTo`.
    ```sql
-   SELECT * FROM Employee FOR SYSTEM_TIME AS OF '2018-11-18 04:26:00' ORDER BY EmployeeId
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME AS OF '2018-11-18 04:26:00'
+     WHERE EmployeeId = 5
+     ORDER BY EmployeeId
    ```
    The result is the version of Employee ID 5 with the department name "Support", indicating the state of the data as it became valid exactly at '2018-11-18 04:26:00'.
 
 3. **Querying Just Before the Boundary**:
    - Adjusting the point-in-time query to one second before the boundary (`'2018-11-18 04:25:59'`) retrieves the earlier version of the data.
    ```sql
-   SELECT * FROM Employee FOR SYSTEM_TIME AS OF '2018-11-18 04:25:59' ORDER BY EmployeeId
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME AS OF '2018-11-18 04:25:59'
+     WHERE EmployeeId = 5
+     ORDER BY EmployeeId
    ```
    This time, the query returns the earlier version of Employee ID 5, where the department name was "Engineering". This version was valid up until '2018-11-18 04:26:00', illustrating the inclusive nature of `ValidFrom` and the exclusive nature of `ValidTo`.
 
@@ -347,17 +349,29 @@ Exploring temporal tables in SQL Server further, we delve into the nuances betwe
 
 1. **Equivalent Queries with FROM and BETWEEN**:
    When querying without hitting the exact boundary of `ValidFrom`, both `FROM ... TO` and `BETWEEN ... AND` return identical results.
+
    ```sql
-   SELECT * FROM Employee FOR SYSTEM_TIME FROM    '2018-11-02' TO  '2018-12-03 08:59:59' WHERE EmployeeId = 5
-   SELECT * FROM Employee FOR SYSTEM_TIME BETWEEN '2018-11-02' AND '2018-12-03 08:59:59' WHERE EmployeeId = 5
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME FROM '2018-11-02' TO '2018-12-03 08:59:59'
+     WHERE EmployeeId = 5
+   
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME BETWEEN '2018-11-02' AND '2018-12-03 08:59:59'
+     WHERE EmployeeId = 5
    ```
-   These queries retrieve versions of Employee ID 5 valid at any time between November 2, 2018, and one second before December 3, 2018, 09:00:00.
+   These queries are identical, and both retrieve versions of Employee ID 5 valid at any time between November 2, 2018, precisely one second before December 3, 2018, 09:00:00.
 
 2. **Behavior Difference on Exact Boundary**:
-   When the upper bound of the time range exactly matches a `ValidFrom` value, `FOR SYSTEM_TIME BETWEEN` includes an additional row that represents the state of the data at the boundary.
+   However, when the upper bound of the time range exactly matches a `ValidFrom` value, `FOR SYSTEM_TIME BETWEEN` includes an additional row that represents the state of the data at the boundary.
+
    ```sql
-   SELECT * FROM Employee FOR SYSTEM_TIME FROM    '2018-11-02' TO  '2018-12-03 09:00:00' WHERE EmployeeId = 5
-   SELECT * FROM Employee FOR SYSTEM_TIME BETWEEN '2018-11-02' AND '2018-12-03 09:00:00' WHERE EmployeeId = 5
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME FROM '2018-11-02' TO '2018-12-03 09:00:00'
+     WHERE EmployeeId = 5
+   
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME BETWEEN '2018-11-02' AND '2018-12-03 09:00:00'
+     WHERE EmployeeId = 5
    ```
    The first query, using `FROM ... TO`, does not include the version of Employee ID 5 that became valid exactly at '2018-12-03 09:00:00'. In contrast, the second query, using `BETWEEN`, includes this version, demonstrating `BETWEEN`'s inclusivity of the upper boundary.
 
@@ -373,14 +387,19 @@ In SQL Server's exploration of temporal tables, the `FOR SYSTEM_TIME CONTAINED I
 1. **FOR SYSTEM_TIME FROM A TO B**:
    This query returns rows if their valid period overlaps with any part of the time range specified by A and B. It includes rows where either `ValidFrom` or `ValidTo` falls within the specified range, thus capturing rows that partially overlap with the time frame.
    ```sql
-   SELECT * FROM Employee FOR SYSTEM_TIME FROM '2018-11-02' TO '2018-12-04' WHERE EmployeeId = 5
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME FROM '2018-11-02' TO '2018-12-04'
+     WHERE EmployeeId = 5
    ```
    This retrieves all versions of Employee ID 5 that have any part of their valid period within November 2, 2018, to December 4, 2018.
 
 2. **FOR SYSTEM_TIME CONTAINED IN (A, B)**:
    Contrary to `FROM A TO B`, the `CONTAINED IN (A, B)` variant returns rows only if their entire valid period is within the time boundaries A and B. This means both `ValidFrom` and `ValidTo` must fall within the specified range for a row to be included.
+
    ```sql
-   SELECT * FROM Employee FOR SYSTEM_TIME CONTAINED IN ('2018-11-02', '2018-12-04') WHERE EmployeeId = 5
+   SELECT *
+     FROM Employee FOR SYSTEM_TIME CONTAINED IN ('2018-11-02', '2018-12-04')
+     WHERE EmployeeId = 5
    ```
    This query will return versions of Employee ID 5 where the entire valid period is encompassed between November 2, 2018, and December 4, 2018, excluding any versions that only partially overlap with this range.
 
@@ -416,7 +435,7 @@ Schema changes within SQL Server temporal tables, especially the addition or del
    SELECT * FROM EmployeeHistory
    ```
 
-It's important to note the exceptions to this automatic synchronization. Certain column types, such as IDENTITY and computed columns, cannot be directly added to the history table due to their nature. For these cases, the system versioning must be temporarily disabled, changes applied manually to both tables to ensure consistency, and then system versioning re-enabled. This process ensures both tables maintain equivalent schemas, except for the necessary deviations, and continues to support the temporal querying capabilities of SQL Server.
+It's important to note the exceptions to this automatic synchronization. Certain column types, such as IDENTITY and computed columns, cannot be directly added to the history table due to their nature. For these cases, the system versioning must be temporarily disabled, changes applied manually to both tables to ensure consistency, and then system versioning re-enabled.
 
 
 
@@ -439,7 +458,7 @@ CREATE TABLE Employee2(
     LastName varchar(20) NOT NULL,
     DepartmentName varchar(50) NOT NULL,
     ValidFrom datetime2 GENERATED ALWAYS AS ROW START HIDDEN NOT NULL,
-    ValidTo   datetime2 GENERATED ALWAYS AS ROW END HIDDEN   NOT NULL,
+    ValidTo   datetime2 GENERATED ALWAYS AS ROW END   HIDDEN NOT NULL,
     PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)
 )
 WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.Employee2History))
@@ -476,32 +495,21 @@ This approach allows for the streamlined presentation of data by default, with t
 
 To clean up and remove the temporal tables created during the previous demos, it's necessary to first disable system versioning for each table. This step decouples the primary table from its associated history table, allowing both to be treated as standard, non-temporal tables. Once system versioning is turned off, both the primary table and its history table can be deleted without any constraints imposed by the temporal setup.
 
-Here’s how to properly clean up the `Employee2` table, followed by the `Employee` table:
-
-1. Disable system versioning on the `Employee2` table:
-
-```sql
-ALTER TABLE Employee2 SET (SYSTEM_VERSIONING = OFF)
-```
-
-2. Delete the `Employee2` table and its history table:
-
-```sql
-DROP TABLE Employee2
-DROP TABLE Employee2History
-```
-
-3. Disable system versioning on the `Employee` table:
+- Disable system versioning and delete the `Employee` and `EmployeeHistory` tables:
 
 ```sql
 ALTER TABLE Employee SET (SYSTEM_VERSIONING = OFF)
-```
-
-4. Delete the `Employee` table and its history table:
-
-```sql
 DROP TABLE Employee
 DROP TABLE EmployeeHistory
 ```
 
-By following these steps, you remove the temporal tables and their history tables, ensuring a clean environment. This cleanup process highlights the importance of disabling system versioning before attempting to delete a temporal table, ensuring the integrity and manageability of the database schema.
+- Disable system versioning and delete the `Employee2` and `Employee2History` tables:
+
+```sql
+ALTER TABLE Employee2 SET (SYSTEM_VERSIONING = OFF)
+DROP TABLE Employee2
+DROP TABLE Employee2History
+```
+
+This cleanup process highlights the importance of disabling system versioning before attempting to delete a temporal table.
+
