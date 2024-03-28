@@ -1,10 +1,10 @@
-﻿## Temporal Tables
+﻿# Temporal Tables
 
 Temporal tables, introduced in SQL Server 2016, enable SQL Server to automatically manage historical data. These tables include two specifically defined columns, the "period" columns, which SQL Server populates to track when each row is valid in time. This feature is particularly useful for maintaining an auditable history of data changes over time.
 
 In this demonstration, we will create a new temporal table named `Employee` and define a custom history table called `EmployeeHistory`. The `WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory))` clause specifies that system versioning is enabled for the table and designates `EmployeeHistory` as the history table.
 
-### Creating a Temporal Table
+## Creating a Temporal Table
 
 ```sql
 CREATE TABLE Employee
@@ -22,7 +22,7 @@ WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.EmployeeHistory))
 
 In this code, the `PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)` clause identifies the `ValidFrom` and `ValidTo` columns as the special period columns used by SQL Server to manage the row's validity period. The `SYSTEM_VERSIONING = ON` option enables versioning for the table, with changes being tracked in the specified history table `EmployeeHistory`.
 
-### Discovering Temporal and History Tables
+## Discovering Temporal and History Tables
 
 Refresh to Object Explorer in SQL Server Management Studio. Note how temporal tables are designated with a special icon, and their associated history tables appear nested beneath them in the tree view.
 
@@ -48,7 +48,7 @@ WHERE
 
 This query returns information about the temporal table and its history table, including the `object_id` and the `name` of each table, as well as their `temporal_type_desc` which indicates whether the table is a history table or the main table.
 
-### Deleting a Temporal Table
+## Deleting a Temporal Table
 
 To clean up and remove the temporal table and its history table, it's necessary to first "decouple" them by turning off system versioning:
 
@@ -62,12 +62,12 @@ The `ALTER TABLE Employee SET (SYSTEM_VERSIONING = OFF)` statement disables syst
 
 
 
-### Convert an Existing Table to Temporal
+## Convert an Existing Table to Temporal
 
 
 In this demonstration, we start by creating and populating the `Employee` table with initial employee records. This step is foundational for transforming the existing table into a temporal table later on. It's important to note that at this stage, the table is an ordinary table, and SQL Server is not tracking changes. Therefore, there is no previous change history recorded for these employees.
 
-#### Step 1: Create and Populate the Employee Table
+### Step 1: Create and Populate the Employee Table
 
 ```sql
 CREATE TABLE Employee
@@ -91,7 +91,7 @@ SELECT * FROM Employee
 
 This step focuses on establishing the `Employee` table and inserting six records into it. These records represent the employees at their current state. Given that the table is not yet a temporal table, any changes made to the employee records up to this point have not been recorded, meaning there is no historical data available for these records. This absence of historical data will change once we convert this table into a temporal table, allowing us to track all future modifications to the employee records.
 
-#### Step 2: Execute two ALTER TABLE Statements
+### Step 2: Execute two ALTER TABLE Statements
 
 
 
@@ -133,7 +133,7 @@ These steps illustrate how SQL Server facilitates the transformation of a standa
 
 
 
-### Tracking History in Temporal Tables
+## Tracking History in Temporal Tables
 
 In this demo, we explore how temporal tables track changes over time by updating and deleting records from an existing temporal table, and then examining the generated history. Temporal tables maintain a history of data changes in a separate history table, enabling us to view data as it existed at any point in time.
 
@@ -183,7 +183,7 @@ Remember, disabling `SYSTEM_VERSIONING` decouples the temporal table from its hi
 
 
 
-### Pre-populating Temporal History
+## Pre-populating Temporal History
 
 This demonstration showcases the transformation of ordinary tables into a temporal system, uniquely pre-populating the history with time-spaced changes for a more realistic temporal table functionality.
 
@@ -257,7 +257,7 @@ This process underscores SQL Server's temporal table capabilities, ensuring each
 
 
 
-### Running Point-In-Time Queries
+## Running Point-In-Time Queries
 
 Temporal queries in SQL Server enable us to navigate through time, revisiting a table's state at various times in the past. These queries can be particularly insightful for auditing, data recovery, and historical analysis. Here's a breakdown of each query and its implications:
 
@@ -301,7 +301,7 @@ Each query uses `FOR SYSTEM_TIME AS OF` to perform a temporal query, which SQL S
 
 
 
-### Matching on Exact Point-In-Time Boundaries
+## Matching on Exact Point-In-Time Boundaries
 
 This demo delves into the behavior of temporal queries when the specified point in time (`AS OF`) exactly matches the boundary between two historical states of a row. Here's how SQL Server processes these temporal queries, particularly focusing on the `ValidFrom` and `ValidTo` timestamps:
 
@@ -341,7 +341,7 @@ These demonstrations clarify that the `FOR SYSTEM_TIME AS OF` temporal query con
 
 
 
-### FROM vs. BETWEEN
+## FROM vs. BETWEEN
 
 Exploring temporal tables in SQL Server further, we delve into the nuances between using `FOR SYSTEM_TIME FROM A TO B` versus `FOR SYSTEM_TIME BETWEEN A AND B`. These clauses are integral for querying historical data within a specified time range, offering insights into data's evolution over time. Specifically, we'll examine their behavior with respect to exact boundary matches using Employee ID 5 as our focus.
 
@@ -378,7 +378,7 @@ This distinction is pivotal for scenarios requiring precision in temporal data a
 
 
 
-### CONTAINED IN
+## CONTAINED IN
 
 In SQL Server's exploration of temporal tables, the `FOR SYSTEM_TIME CONTAINED IN (A, B)` clause introduces a nuanced approach to querying historical data, distinct from the `FOR SYSTEM_TIME FROM A TO B` syntax. This difference hinges on the inclusivity of the specified time boundaries A and B, affecting the rows returned based on their period of validity within the temporal table. Here, we focus on Employee ID 5 to illustrate these nuances.
 
@@ -409,7 +409,7 @@ The `CONTAINED IN` clause is particularly useful when the requirement is to isol
 
 
 
-### Schema Changes
+## Schema Changes
 
 Schema changes within SQL Server temporal tables, especially the addition or deletion of columns, illustrate the seamless synchronization between the primary table and its history table. This synchronization ensures the history table mirrors the schema of the primary table, preserving the integrity and consistency of temporal queries over time. This example demonstrates how adding or removing a column from the primary table (`Employee`) is automatically replicated in the history table (`EmployeeHistory`), under normal circumstances.
 
@@ -442,7 +442,7 @@ It's important to note the exceptions to this automatic synchronization. Certain
 
 
 
-### Hidden Period Columns
+## Hidden Period Columns
 
 The concept of hidden period columns in SQL Server's temporal tables is a nuanced feature designed to maintain the cleanliness of query results while still providing access to crucial temporal data when needed. When defining a temporal table, specifying period columns as `HIDDEN` instructs SQL Server to exclude these columns from the results of a `SELECT *` query. This ensures that queries return only the business data without the system-managed temporal information, keeping the results succinct and focused. However, these hidden columns remain accessible and can be explicitly included in a `SELECT` statement, offering flexibility based on the query's requirements.
 
@@ -489,7 +489,7 @@ This approach allows for the streamlined presentation of data by default, with t
 
 
 
-### Cleanup
+## Cleanup
 
 To clean up and remove the temporal tables created during the previous demos, it's necessary to first disable system versioning for each table. This step decouples the primary table from its associated history table, allowing both to be treated as standard, non-temporal tables. Once system versioning is turned off, both the primary table and its history table can be deleted without any constraints imposed by the temporal setup.
 
