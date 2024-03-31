@@ -49,8 +49,27 @@ FROM
     INNER JOIN sys.tables AS t ON mc.[object_id] = t.[object_id]
 ```
 
-This query is particularly useful for database administrators and developers to audit and review how data masking is configured across different tables within a database, ensuring that sensitive data is adequately protected.
+### Populate the Table
 
+Next, populate the `Membership` table with several rows of sample data:
+
+```sql
+INSERT INTO Membership
+ (FirstName,  LastName,      Phone,           Email,                      DiscountCode) VALUES
+ ('Roberto',  'Tamburello',  '555.123.4567',  'RTamburello@contoso.com',  10),
+ ('Janice',   'Galvin',      '555.123.4568',  'JGalvin@contoso.com.co',   20),
+ ('Dan',      'Mu',          '555.123.4569',  'ZMu@contoso.net',          30),
+ ('Jane',     'Smith',       '454.222.5920',  'Jane.Smith@hotmail.com',   40),
+ ('Danny',    'Jones',       '674.295.7950',  'Danny.Jones@hotmail.com',  50)
+```
+
+Now query the `Membership` table to view the sample data we just inserted:
+
+```sql
+SELECT * FROM Membership
+```
+
+The results fully reveal all the data, including the columns we designed as masked. This is because we are connected as user `dbo`, and so we possess the `UNMASK` permission that reveals all masked columns. Let's explore this further by testing with different users and permissions.
 
 ### Discover Users and Permissions
 
