@@ -16,4 +16,4 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
 Follow these setups carefully to ensure a smooth experience with the hands-on labs.
 
-All set? Let's get started!
+All set? [Let's get started!](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
