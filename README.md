@@ -1,4 +1,4 @@
-# Hands-On Lab Setup: SQL Server 2022 and Development Tools
+# Hands-On Lab: SQL Server 2022 for Developers
 
 Welcome!
 
