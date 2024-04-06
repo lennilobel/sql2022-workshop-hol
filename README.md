@@ -16,7 +16,7 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
    1. **Open SSMS and Connect:** Launch SQL Server Management Studio and connect to your local SQL Server instance.
 
-   2. **Navigate to 'Databases':** In Object Explorer on the left, expand the server node and right-click on the "Databases" folder, then select "Restore Database..."
+   2. **Navigate to 'Databases':** In Object Explorer on the left, right-click on the "Databases" folder, then select "Restore Database..."
 
    3. **Select Backup Source:** In the Restore Database window, choose the "Device" radio button under "Source", click the button with three dots to open "Select backup devices", click "Add", navigate to your Downloads folder, select AdventureWorks2019.bak, and click "OK".
 
