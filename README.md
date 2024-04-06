@@ -61,6 +61,8 @@ Before diving into the hands-on labs, ensure you have the necessary software and
       7. Now click `OK` to start the restore process.
 
    After the restore completes successfully, the WideWorldImporters database will appear in the "Databases" folder in Object Explorer.
+
+   You can now delete the `C:\HolDB` folder, as well as the two database backup files in your Downloads folder.
  
 You're all set. Ready to dive in? [Let's get started!](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
 
