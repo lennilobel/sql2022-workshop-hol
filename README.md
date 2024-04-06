@@ -24,7 +24,7 @@ Before diving into the hands-on labs, ensure you have the necessary software and
       2. Navigate to the C drive (C:\).
       3. Right-click in an empty space, select `New` > `Folder`, and name the new folder `HolDB`.
 
-   2. **Copy the Backup File:**    Copy the `AdventureWorks2019.bak` file from your Downloads folder to the `C:\HolDB` folder you just created.
+   2. **Copy the Backup File:** Copy the `AdventureWorks2019.bak` file from your Downloads folder to the `C:\HolDB` folder you just created.
 
       1. Navigate to your Downloads folder.
       2. Find the `AdventureWorks2019.bak` file.
@@ -46,7 +46,21 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
 5. **Wide World Importers Database**: One demo uses the Wide World Importers sample database. Download the `WideWorldImporters.bak` backup file file available [here](https://1drv.ms/f/s!AiiTRkT0Yvc4xd8Kz1oSgzjbselEIA?e=yFaqjc) (right-click and open in a new tab).
 
-   Then restore the database using the same steps you just followed for AdventureWorks2019, with the only difference being that you'll choose `WideWorldImporters.bak`. Just follow the instructions as previously described, substituting the name "WideWorldImporters" wherever "AdventureWorks2019" was used.
+   Then restore the database using similar steps you just followed for AdventureWorks2019:
 
+   1. **Copy the Backup File:** Copy the `WideWorldImports.bak` file from your Downloads folder to the `C:\HolDB` folder.
+
+   3. **Restore the Database using SSMS:** Now that the backup file is in an accessible location, you can proceed with restoring it to your SQL Server instance.
+
+      2. In the Object Explorer on the left, right-click on the `Databases` node and select `Restore Database...`.
+      2. In the Restore Database Dialog, select the `Device` radio button under the `Source` section.
+      3. Click the `...` button on the right to open the Select Backup Devices dialog.
+      4. Click on the `Add` button to open the Locate Backup File dialog.
+      5. Navigate to the `C:\HolDB` folder and select the `WideWorldImports.bak` file, then click `OK`.
+      6. The backup file should now appear in the Select Backup Devices dialog. Click `OK` to return to the Restore Database dialog.
+      7. Now click `OK` to start the restore process.
+
+   After the restore completes successfully, the WideWorldImporters database will appear in the "Databases" folder in Object Explorer.
+ 
 All set? [Let's get started!](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
 
