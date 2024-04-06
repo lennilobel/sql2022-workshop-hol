@@ -10,7 +10,10 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
 3. **Visual Studio 2022**: Some demos, especially those involving Row-Level Security and Always Encrypted, require Visual Studio 2022. The Community Edition is free for students, open-source contributors, and individuals. Download it from [Visual Studio's Community Edition page](https://visualstudio.microsoft.com/vs/community/) (right-click and open in a new tab).
 
-4. **AdventureWorks2019 Database**: Many demos utilize the AdventureWorks2019 sample database. Download the `AdventureWorks2019.bak` backup file available from [Microsoft's documentation page](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver16&tabs=ssms) (right-click and open in a new tab).
+4. **AdventureWorks2019 Database**: Many demos utilize the AdventureWorks2019 sample database. Click [here](https://1drv.ms/u/s!AiiTRkT0Yvc4xd8NadHLe7PKBbYRxA?e=Jm6Fez) to download the `AdventureWorks2019.bak` backup file.
+
+<!-- AdventureWorks2019 available from [Microsoft's documentation page](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver16&tabs=ssms)
+-->
 
    Then restore the backup file as follows:
 
@@ -27,7 +30,10 @@ Before diving into the hands-on labs, ensure you have the necessary software and
    8. **Initiate the Restore:** Click "OK" to start the restoration. This may take a few minutes, and you'll see a success message once complete. The AdventureWorks2019 database will appear in the "Databases" folder in Object Explorer.
 
 
-5. **Wide World Importers Database**: One demo uses the Wide World Importers sample database. Download the `WideWorldImporters-Full.bak` backup file file found on the [GitHub releases page for SQL Server samples](https://github.com/Microsoft/sql-server-samples/releases/tag/wide-world-importers-v1.0) (right-click and open in a new tab).
+5. **Wide World Importers Database**: One demo uses the Wide World Importers sample database. Click [here](https://1drv.ms/u/s!AiiTRkT0Yvc4xd8MngU47Ffjpj8sGA?e=Nj9j3h) to download the `WideWorldImporters-Full.bak` backup file.
+
+<!-- WideWorldImporters-Full.bak from [GitHub releases page for SQL Server samples](https://github.com/Microsoft/sql-server-samples/releases/tag/wide-world-importers-v1.0).
+-->
 
    Then restore the database using the same steps you just followed for AdventureWorks2019, with the only difference being that when you select the backup file, you'll choose `WideWorldImporters.bak` from your Downloads folder. Just follow the instructions as previously described, substituting the name "WideWorldImporters" wherever "AdventureWorks2019" was used.
 
