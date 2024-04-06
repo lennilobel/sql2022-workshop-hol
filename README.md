@@ -62,5 +62,5 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
    After the restore completes successfully, the WideWorldImporters database will appear in the "Databases" folder in Object Explorer.
  
-All set? [Let's get started!](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
+You're all set. Ready to dive in? [Let's get started!](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
 
