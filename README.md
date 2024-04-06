@@ -14,15 +14,25 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
    Then restore the backup file as follows:
 
-   1. **Open SSMS and Connect:** Launch SQL Server Management Studio and connect to your local SQL Server instance.
+    1. **Open File Explorer and Copy Path:**
+       - Navigate to your Downloads folder where the AdventureWorks2019.bak file is located.
+       - Click on the address bar in File Explorer to reveal the full path, right-click it, and select "Copy" to copy the full path of your Downloads folder.
 
-   2. **Navigate to 'Databases':** In Object Explorer on the left, right-click on the "Databases" folder, then select "Restore Database..."
+    2. **Open SSMS and Connect:**
+       - Launch SQL Server Management Studio and connect to your local SQL Server instance.
 
-   3. **Select Backup Source:** In the Restore Database window, choose the "Device" radio button under "Source", click the button with three dots to open "Select backup devices", click "Add", navigate to your Downloads folder, select AdventureWorks2019.bak, and click "OK".
+    3. **Navigate to 'Databases':**
+       - In Object Explorer on the left, expand the server node and right-click on the "Databases" folder, then select "Restore Database..."
 
-    4. **Set Destination Database:** In the "Destination" section, enter "AdventureWorks2019" in the "Database" field for the name of the restored database.
+    4. **Select Backup Source Using Copied Path:**
+       - In the Restore Database window, choose the "Device" radio button under "Source".
+       - Click the button with three dots to open the "Select backup devices" dialog.
+       - Click "Add", then in the File name field at the bottom of the dialog, paste the path you copied from File Explorer and press Enter. This navigates directly to your Downloads folder within the dialog.
+       - Now select AdventureWorks2019.bak, and click "OK".
 
-    5. **Choose Backup Set:** Ensure the backup set to restore is checked under "Select the backup sets to restore". This should auto-populate based on the selected .bak file.
+   5. **Set Destination Database:** In the "Destination" section, enter "AdventureWorks2019" in the "Database" field for the name of the restored database.
+
+   6. **Choose Backup Set:** Ensure the backup set to restore is checked under "Select the backup sets to restore". This should auto-populate based on the selected .bak file.
 
    8. **Initiate the Restore:** Click "OK" to start the restoration. This may take a few minutes, and you'll see a success message once complete. The AdventureWorks2019 database will appear in the "Databases" folder in Object Explorer.
 
