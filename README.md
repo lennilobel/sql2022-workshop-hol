@@ -1,4 +1,4 @@
-# Hands-On Lab: SQL Server 2022 for Developers
+﻿# Hands-On Lab: SQL Server 2022 for Developers
 
 Welcome!
 
@@ -57,5 +57,8 @@ Before diving into the hands-on labs, ensure you have the necessary software and
  
 ## You're all set.
 
-Ready to dive in? [Let's get started!](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
+Ready to dive in?
+
+[Let's get started! ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL)
+
 
