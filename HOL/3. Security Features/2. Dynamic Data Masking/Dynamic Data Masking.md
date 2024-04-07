@@ -368,4 +368,4 @@ This cleanup ensures that all demo-related objects are removed, leaving your env
 
 ___
 
-[Next Lab ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security)
+[Row-Level Security (RLS) ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security)
