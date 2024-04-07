@@ -2,7 +2,7 @@
 
 In this section, you will learn all the major T-SQL enhancements introduced in SQL Server 2022. These include brand new T-SQL functions, as well as enhancements to several existing T-SQL functions.
 
-Labs in this section conver the following T-SQL enhancements:
+Labs in this section cover the following T-SQL enhancements:
 
 - **DATE_BUCKET**: Returns the date corresponding to the start of each bucket.
 
