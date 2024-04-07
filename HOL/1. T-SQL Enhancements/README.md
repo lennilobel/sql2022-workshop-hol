@@ -18,7 +18,7 @@ Labs in this section conver the following T-SQL enhancements:
 
 ___
 
-The labs in this section are independent of one another, so it is not necessary to work through every one of them. You can choose to work through these labs in any order you prefer, focusing on those that interest you more, and skipping those that don't don't.
+The labs in this section are independent of one another, so it is not necessary to work through every one of them. You can choose to work through these labs in any order you prefer, focusing on those that interest you more first, and them exploring the others later.
 
 [Lab: T-SQL Enhancements - DATE_BUCKET ▶](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/1.%20T-SQL%20Enhancements/1.%20DATE_BUCKET.md)
 
