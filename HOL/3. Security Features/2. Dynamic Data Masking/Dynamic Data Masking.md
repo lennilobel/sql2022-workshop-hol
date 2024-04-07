@@ -366,4 +366,6 @@ DROP TABLE IF EXISTS MaskingSample
 
 This cleanup ensures that all demo-related objects are removed, leaving your environment clean and ready for further exploration or other demos.
 
+___
+
 [Next Lab ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security)
