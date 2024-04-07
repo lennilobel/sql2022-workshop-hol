@@ -5,7 +5,7 @@ In this section, you will learn all the major T-SQL enhancements introduced in S
 Lab in this section include:
 
 |Function|Description
-|
+|-|-
 |DATE_BUCKET           |Returns the date corresponding to the start of each bucket
 |DATETRUNC             |Return a date truncated to any part
 |LEAST and GREATEST    |Return the minimum or maximum value across columns
