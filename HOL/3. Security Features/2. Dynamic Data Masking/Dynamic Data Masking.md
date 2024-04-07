@@ -1,4 +1,4 @@
-## Dynamic Data Masking
+﻿## Dynamic Data Masking
 
 Dynamic Data Masking (DDM) is a security feature in SQL Server that automatically hides sensitive data in the result set of a query over designated database fields, without changing the actual data in the database. DDM can be used to restrict unauthorized access to sensitive data by masking it to non-privileged users, making it a powerful tool for enhancing data privacy and compliance. This enables developers and database administrators to define how much of the sensitive data to reveal with minimal impact on the application layer.
 
@@ -365,3 +365,5 @@ DROP TABLE IF EXISTS MaskingSample
 ```
 
 This cleanup ensures that all demo-related objects are removed, leaving your environment clean and ready for further exploration or other demos.
+
+[Next Lab ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security)
