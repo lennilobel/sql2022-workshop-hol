@@ -18,15 +18,15 @@ Lab in this section include:
 
 |Function|Description|
 |-|-|
-|DATE_BUCKET            | Returns the date corresponding to the start of each bucket   |
-|DATETRUNC              | Return a date truncated to any part                          |
-|LEAST and GREATEST     | Return the minimum or maximum value across columns           |
-|STRING_SPLIT ordinal   | Returns ordinal of each split element                        |
-|GENERATE_SERIES        | Generate a number series resultset                           |
-|TRIM enhancements      | Greater control over leading and trailing characters to trim |
-|IS [NOT] DISTINCT FROM | NULL-safe equality check                                     |
-|Windowing enhancements | SELECT…WINDOW, and FIRST_VALUE/LAST_VALUE enhancements       |
-|Bit functions          | Bit masking and bit manipulation                             |
+|DATE_BUCKET           |Returns the date corresponding to the start of each bucket
+|DATETRUNC             |Return a date truncated to any part
+|LEAST and GREATEST    |Return the minimum or maximum value across columns
+|STRING_SPLIT ordinal  |Returns ordinal of each split element
+|GENERATE_SERIES       |Generate a number series resultset
+|TRIM enhancements     |Greater control over leading and trailing characters to trim
+|IS [NOT] DISTINCT FROM|NULL-safe equality check
+|Windowing enhancements|SELECT…WINDOW, and FIRST_VALUE/LAST_VALUE enhancements
+|Bit functions         |Bit masking and bit manipulation
 
 ___
 
