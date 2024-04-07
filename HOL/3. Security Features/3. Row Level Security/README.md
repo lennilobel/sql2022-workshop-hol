@@ -11,6 +11,8 @@ You will learn how to leverage Row-Level Security by working through three labs,
 - **Integrating Row-Level Security with a C# Client Application**: Learn how RLS policies can be applied directly to a client application written in C#. This lab demonstrates the practical implementation of RLS in real-world applications, showcasing how to secure data access at the row level from within application code.
 
 Through these labs, you will gain hands-on experience in configuring and applying Row-Level Security, enabling you to implement robust data access controls in your SQL Server databases and applications.
+
+When you open a query window in SSMS to start working on the first lab, leave it open to continue working through the remaining labs in this section.
 ___
 
 [Lab: Row-Level Security (RLS) - Read-Only Policy ▶](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security/1.%20Read-Only%20RLS%20Policy.md)

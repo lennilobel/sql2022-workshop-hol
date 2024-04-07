@@ -1,6 +1,6 @@
 ﻿## Dynamic Data Masking
 
-Start by pressing `CTRL+N` to open a new query window for this lab. Then switch to the AdventureWorks2019 database:
+Start by pressing `CTRL+N` to open a new query window for this lab in SSMS. Then switch to the AdventureWorks2019 database:
 
 ```sql
 USE AdventureWorks2019

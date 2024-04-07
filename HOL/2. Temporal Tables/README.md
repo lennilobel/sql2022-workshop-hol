@@ -10,7 +10,7 @@ This section includes three labs that are designed to be followed in sequence:
 - Tracking History
 - Point-in-Time Queries
 
-When you open a query window in SSMS to start working on the first lab, leave it open for the remaining labs in this section.
+When you open a query window in SSMS to start working on the first lab, leave it open to continue working through the remaining labs in this section.
 
 ___
 
