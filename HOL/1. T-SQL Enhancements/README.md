@@ -4,17 +4,23 @@ In this section, you will learn all the major T-SQL enhancements introduced in S
 
 Labs in this section conver the following T-SQL enhancements:
 
-|Function|Description
-|-|-
-|DATE_BUCKET           |Returns the date corresponding to the start of each bucket
-|DATETRUNC             |Return a date truncated to any part
-|LEAST and GREATEST    |Return the minimum or maximum value across columns
-|STRING_SPLIT ordinal  |Returns ordinal of each split element
-|GENERATE_SERIES       |Generate a number series resultset
-|TRIM enhancements     |Greater control over leading and trailing characters to trim
-|IS [NOT] DISTINCT FROM|NULL-safe equality check
-|Windowing enhancements|SELECT…WINDOW, and FIRST_VALUE/LAST_VALUE enhancements
-|Bit functions         |Bit masking and bit manipulation
+- **DATE_BUCKET**: Returns the date corresponding to the start of each bucket.
+
+- **DATETRUNC**: Return a datetime truncated to any part.
+
+- **LEAST and GREATEST**: Returns the minimum or maximum value across columns.
+
+- **STRING_SPLIT ordinal**: Returns the ordinal of each split element.
+
+- **GENERATE_SERIES**: Generates a number series resultset.
+
+- **TRIM enhancements**: Provides greater control over leading and trailing characters to trim.
+
+- **IS [NOT] DISTINCT FROM**: Provids a NULL-safe equality check.
+
+- **Windowing enhancements**: SELECT…WINDOW, and FIRST_VALUE/LAST_VALUE enhancements.
+
+- **Bit functions**: Bit masking and bit manipulation.
 
 ___
 
