@@ -2,7 +2,7 @@
 
 In this section, you will learn all the major T-SQL enhancements introduced in SQL Server 2022. These include brand new T-SQL functions, as well as enhancements to several existing T-SQL functions.
 
-Lab in this section include:
+Labs in this section include:
 
 |Function|Description
 |-|-

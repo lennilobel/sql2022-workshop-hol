@@ -1,42 +1,39 @@
 ﻿## Dynamic Data Masking
 
-Dynamic Data Masking (DDM) is a security feature in SQL Server that automatically hides sensitive data in the result set of a query over designated database fields, without changing the actual data in the database. DDM can be used to restrict unauthorized access to sensitive data by masking it to non-privileged users, making it a powerful tool for enhancing data privacy and compliance. This enables developers and database administrators to define how much of the sensitive data to reveal with minimal impact on the application layer.
+Start by pressing `CTRL+N` to open a new query window for this lab. Then switch to the AdventureWorks2019 database:
+
+```sql
+USE AdventureWorks2019
+```
 
 ### Create the Membership Table
 
-Dynamic Data Masking (DDM) is a security feature in SQL Server that obscures sensitive data in the result set of a query, ensuring that unauthorized users can't see the data they shouldn't access. In this example, we create a `Membership` table with various columns, each employing a different pre-defined DDM function to mask data:
+Let's start by creating a `Membership` table with various columns, each employing a different pre-defined DDM function to mask data:
 
 ```sql
-CREATE DATABASE MyMaskedDB
-GO
-
-USE MyMaskedDB
-GO
-
 -- Create table with a few masked columns
 CREATE TABLE Membership(
-    MemberId int IDENTITY PRIMARY KEY,
-    FirstName varchar(100) MASKED WITH (FUNCTION = 'partial(2, "...", 2)') NULL,
-    LastName varchar(100) NOT NULL,
-    Phone varchar(12) MASKED WITH (FUNCTION = 'default()') NULL,
-    Email varchar(100) MASKED WITH (FUNCTION = 'email()') NULL,
-    DiscountCode smallint MASKED WITH (FUNCTION = 'random(1, 100)') NULL)
+    MemberId      int IDENTITY PRIMARY KEY,
+    FirstName     varchar(100)  MASKED WITH (FUNCTION = 'partial(2, "...", 2)'),
+    LastName      varchar(100),
+    Phone         varchar(12)   MASKED WITH (FUNCTION = 'default()'),
+    Email         varchar(100)  MASKED WITH (FUNCTION = 'email()'),
+    DiscountCode  smallint      MASKED WITH (FUNCTION = 'random(1, 100)'))
 ```
 
-1. **Partial Masking (`partial()`)**: Reveals the first two and the last two characters of the `FirstName`, masking the middle part with dots. This function offers flexibility for masking string data.
+1. **Partial Masking**: The `partial()` function reveals the first two and the last two characters of the `FirstName`, masking the middle part with dots. This function supports string data types only.
 
-2. **Default Masking (`default()`)**: Completely masks the `Phone` number. The term "default" may be somewhat misleading; "full" might have been a more descriptive name since it fully masks the value, unlike the `partial()` function which only partially masks values. This function is suitable for any data type to hide the original data behind a generic mask.
+2. **Default Masking**: The `default()` function completely masks the `Phone` number. The term "default" may be somewhat misleading; "full" might have been a more descriptive name since it fully masks the value, unlike the `partial()` function which only partially masks values. This function supports every data type to hide the original data behind a generic mask.
 
-3. **Email Masking (`email()`)**: Applied to the `Email` column, this function only reveals the first character and masks the rest as XXX@XXX.COM. Interestingly, this specific function is somewhat redundant since the same effect can be achieved with the `partial()` function by specifying `partial(1, 'XXX@XXX.COM', 0)`, making the email function effectively useless and highlighting that there are essentially only three distinctively useful masking functions.
+3. **Email Masking**: The `email()` function is applied to the `Email` column. This function only reveals the first character and masks the rest as XXX@XXX.COM. In fact, this specific function is redundant, as the same effect can be achieved with the `partial()` function by specifying `partial(1, 'XXX@XXX.COM', 0)`. This makes the email function effectively useless, and highlights that there are practially only three distinctively useful masking functions.
 
-4. **Random Masking (`random()`)**: Generates a random number within a specified range for the `DiscountCode`, an alternative to using `default()`, which works with all data types and would always fully mask numbers as 0. Using `random()` also fully masks numbers but by generating random numbers within a range that might depict some real scenario (like the range of numbers 1 through 7 to indicate the day of the week), thus providing more useful sample obfuscated data.
+4. **Random Masking**: The `random()` function generates a random number within a specified range for the `DiscountCode`. This function works with numeric data types only, and can be used as an alternative to using `default()`, which works with all data types and would always fully mask numbers as 0. Using `random()` also fully masks numbers but by generating random numbers within a range that might depict some real scenario (like the range of numbers 1 through 7 to indicate the day of the week, for example), thus providing more useful sample obfuscated data.
 
-It's important to note that while DDM provides these predefined functions, SQL Server does not allow the creation of custom masking functions, limiting the flexibility to these three core masking approaches (with the email mask being a specialized but replaceable use case of partial masking).
-
-
+Note that while DDM provides these predefined functions, SQL Server does not allow the creation of custom masking functions, which somewhat limits the feature's flexibility.
 
 ### Discover Masked Columns
-To explore the masked columns within the database and understand how data masking is applied to each, you can utilize the following query. This query joins `sys.masked_columns` with `sys.tables`, allowing you to view details such as the table name, column name, and the specific masking function applied to each column. Here's how you can perform this discovery:
+
+To explore the masked columns within the database and understand how data masking is applied to each, run the following query:
 
 ```sql
 -- Discover all masked column in the database
@@ -48,6 +45,8 @@ FROM
     sys.masked_columns AS mc
     INNER JOIN sys.tables AS t ON mc.[object_id] = t.[object_id]
 ```
+
+This query joins `sys.masked_columns` with `sys.tables` on each table's `object_id`, and allows us to view the table name, column name, and the specific masking function applied to each column.
 
 ### Populate the Table
 
@@ -69,11 +68,13 @@ Now query the `Membership` table to view the sample data we just inserted:
 SELECT * FROM Membership
 ```
 
-The results fully reveal all the data, including the columns we designed as masked. This is because we are connected as user `dbo`, and so we possess the `UNMASK` permission that reveals all masked columns. Let's explore this further by testing with different users and permissions.
+The results fully reveal all the data, including the columns we designed as masked. This is because we are connected as user `dbo`, the special built-in user that is implicitly granted all permissions. Thus, we possess the `UNMASK` permission required to reveals masked columns.
+
+Let's explore this further by testing with different users and permissions.
 
 ### Discover Users and Permissions
 
-To provide a comprehensive overview of database users, their associated logins, and their permissions within the database, the following view named `vwShowUsers` is created. This view joins several catalog views to produce a detailed report that includes each database user's name, the login name they're associated with, their login type, the state and name of their permissions, and, where applicable, the names of tables and columns those permissions apply to. This view focuses on users 'dbo', 'RegularUser', and 'ContactUser', giving insights into their access levels and permissions across the database. Here's how to create this useful view:
+To aid our understanding of DDM in this lab, let's create a view named `vwShowUsers` that joins several security-related catalog views together to report each database user's name, the login name they're associated with, their login type, the state and name of their permissions, and (where applicable) the names of tables and columns those permissions apply to. The view's `WHERE` clause focuses on users 'dbo', 'RegularUser', and 'ContactUser', which we'll be experimenting with in this lab:
 
 ```sql
 CREATE VIEW vwShowUsers AS
@@ -95,76 +96,64 @@ FROM
     LEFT OUTER JOIN master..syslogins AS l ON u.sid = l.sid
 WHERE
     pr.name in ('dbo', 'RegularUser', 'ContactUser')
-GO
 ```
 
-This view will be instrumental in understanding how permissions are distributed among users within the database, particularly as it pertains to the demos that follow.
+This view will be instrumental in understanding how permissions are distributed among users within the database, particularly as it pertains to this lab.
 
-
-
-
-
-
-
-
-
-
-When querying the `vwShowUsers` view, it becomes apparent that there is only one explicitly listed permission for the `dbo` user, which is the ability to connect to the database. However, it's crucial to understand that the `dbo` user inherently possesses a comprehensive set of permissions within the database, including the `UNMASK` permission. This extensive access allows the `dbo` user to see the actual data in columns that have been masked using Dynamic Data Masking (DDM), without the masking being applied.
+Now query the view:
 
 ```sql
 -- The currently connected login is mapped to user dbo, with full permissions implied, including UNMASK
 SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnName
 ```
 
+From the results returned by this view, it becomes apparent that there is only one explicitly listed permission for the `dbo` user, which is the ability to connect to the database. However, as already mentioned, the `dbo` user inherently possesses all permissions within the database, and that of course includes the `UNMASK` permission. Thus, connected as the `dbo` user, we can see the actual data in columns that have been masked using Dynamic Data Masking (DDM), without the masking being applied.
+
 ### Create New User `RegularUser`
 
-By creating a new user named `RegularUser` without an associated login, you're establishing a user within the database that starts with minimal permissions. Initially, this user has only the basic ability to connect to the database and lacks more extensive permissions such as `UNMASK` or even `SELECT` permissions on tables like `Membership`. This starkly contrasts with the `dbo` user, who implicitly inherits all permissions within the database, including `UNMASK`. The creation of `RegularUser` and the subsequent query of the `vwShowUsers` view illustrates the default permissions state for new users and highlights the necessity of explicitly granting further permissions to access and interact with database objects. Here's the code to create the user and review their permissions:
+So let's create a new "ordinary" user named `RegularUser`:
 
 ```sql
 CREATE USER RegularUser WITHOUT LOGIN
+```
+
+And now, query the view again:
+
+```sql
 SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnName
 ```
 
-Upon querying `vwShowUsers` following the creation of `RegularUser`, you'll observe that, aside from the ability to connect to the database, no additional permissions are listed for this user. This absence of permissions, including the lack of `UNMASK`, means that `RegularUser` cannot view the unmasked data in the `Membership` table, nor can they perform basic `SELECT` queries on it without further permission grants. This delineates a clear boundary between the inherent permissions of the `dbo` user and the restricted, default permissions state of newly created users in SQL Server.
+Now we see `RegularUser` that, like `dbo` has permission to connect to the database. But unlike `dbo`, this is the only permission that `RegularUser` possesses. Thus, `RegularUser` not only lacks the `UNMASK` permission, it is not even granted `SELECT` permission on the `Membership` table. And without that `SELECT` permission, this user can't even view unmasked data in the table.
 
-### Grant Permissions to `RegularUser`
-
-Granting `SELECT` permissions on the `Membership` table to `RegularUser` enables this user to query the table and view its contents. However, since `RegularUser` does not have the `UNMASK` permission, they will only see masked versions of the data in columns protected by Dynamic Data Masking (DDM). This ensures that sensitive information remains obscured to users without explicit permission to view it unmasked. Here's how you can grant `SELECT` permissions and verify the updated permissions setup:
+So now, let's granting `SELECT` permissions on the `Membership` table to `RegularUser`, so that this user can query the table and view its contents. But we won't yet also grant this user the `UNMASK` permission, and so they will only see masked versions of the data in columns protected by Dynamic Data Masking (DDM):
 
 ```sql
 GRANT SELECT ON Membership TO RegularUser
 SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnName
 ```
-
-After executing the above commands, querying the `vwShowUsers` view will confirm that `RegularUser` now has the ability to `SELECT` from the `Membership` table, signifying they can query the table but will encounter masked data for protected columns. This illustrates SQL Server's capability to secure sensitive data at the column level, allowing for fine-grained control over data access and privacy.
+And now the view reveals that `RegularUser` now has the ability to `SELECT` from the `Membership` table.
 
 ## Impersonating `RegularUser`
 
-By utilizing the `EXECUTE AS USER` command, we temporarily impersonate the `RegularUser` within our current connection. This allows us to query the `Membership` table and observe how data masking affects the visibility of its data from the perspective of `RegularUser` instead of `dbo`. After running the query, we use `REVERT` to return to our original user context, which is typically a user with more privileges, like `dbo`. This practice is particularly useful for testing how different users experience data access and visibility. Here's the applicable T-SQL:
+By utilizing the `EXECUTE AS USER` command, we can temporarily impersonate the `RegularUser` within our current connection. This allows us to query the `Membership` table and observe how data masking affects the visibility of its data from the perspective of `RegularUser` instead of `dbo`. After running the query, we can use `REVERT` to return to our original `dbo` user context. This practice is particularly useful for testing how different users experience data access and visibility.
+
+Here's the code snippet to do this:
 
 ```sql
-EXECUTE AS USER = 'RegularUser';
-SELECT * FROM Membership;	-- DiscountCode is randomized each time
-REVERT;
+EXECUTE AS USER = 'RegularUser'
+SELECT * FROM Membership	-- DiscountCode is randomized each time
+REVERT
 ```
 
 **Key Observations in the Output:**
-- **FirstName Field:** The `partial(2, "...", 2)` function is applied, revealing the first two and the last two characters for names longer than four characters. Names with four or fewer characters, such as "Dan" and "Jane", are fully masked to preserve privacy.
+- **FirstName Field:** The `partial(2, "...", 2)` function is applied, revealing the first two and the last two characters for names longer than four characters. Names with four or fewer characters, such as "Dan" and "Jane", are fully masked to prevent revealing the entire first name.
 - **Phone Column:** Completely masked with 'xxxx', consistent with the `default()` function, ensuring complete data obfuscation.
-- **Email Addresses:** The `email()` function masks real email addresses by showing only the first character followed by XXX@XXXX.com, effectively masking the true email while providing a standardized placeholder.
-- **DiscountCode Column:** Generates random numbers between 1 and 100 for each query execution, as specified by the `random(1, 100)` function. This results in varying, unpredictable numbers that mask the actual discount codes. It's recommended to run this code multiple times to see the different values produced for the discount code each time, illustrating the dynamic nature of this type of data masking.
-
-This exercise demonstrates Dynamic Data Masking's ability to protect sensitive information from unauthorized access in SQL Server, tailoring data visibility based on user permissions and roles.
-
-
-
-
-
-
+- **Email Addresses:** The `email()` function masks real email addresses by showing only the first character followed by XXX@XXXX.com, effectively masking the true email using a standardized placeholder.
+- **DiscountCode Column:** Generates random numbers between 1 and 100 for each query execution, as specified by the `random(1, 100)` function. This results in varying, unpredictable numbers that mask the actual discount codes. Run the snippet multiple times to observe that different values are produced for the discount code each time, demonstrating the dynamic nature of this type of data masking.
 
 ### Granting and Revoking the UNMASK Permission
 
-By granting the `UNMASK` permission to `RegularUser`, we are now allowing this user to see data in its unmasked form, similar to how the `dbo` user can view all data without the masks applied. Here's how we grant the permission and then verify it:
+Now let's explicitly grant the `UNMASK` permission to `RegularUser`, and allow this user to see data in its unmasked form, just like the `dbo` user that is implicitly granted the `UNMASK` permission:
 
 ```sql
 -- Let RegularUser see unmasked data
@@ -172,11 +161,11 @@ GRANT UNMASK TO RegularUser
 SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnName
 ```
 
-This change in permissions means that when `RegularUser` accesses the `Membership` table, they will see actual data values for columns like `FirstName`, `Phone`, `Email`, and `DiscountCode`, rather than the masked versions. It's a significant permission grant that should be carefully considered in the context of data privacy and security policies within your organization.
+Now the view reveals that `RegularUser` possesses both `SELECT` permission on the `Membership` table, as well as the database-wide `UNMASK` permission:
 
-Typically, you would assign the `UNMASK` permission to a role rather than to each individual user. Then, every user that is a member of that role would inherit the `UNMASK` permission. We're only granting permission at the user level in this demo to keep things simple without detracting from the way Dynamic Data Masking (DDM) works.
+> Note that, typically, you would assign the `UNMASK` permission to a role rather than to each individual user. Then, every user added as a member of that role would inherit the `UNMASK` permission. We're only granting permission at the user level in this demo to keep things simple without detracting from the way Dynamic Data Masking (DDM) works.
 
-By granting the `UNMASK` permission to `RegularUser`, they are now able to see all the data without the masking applied. Here's how you can see the effect:
+By granting the `UNMASK` permission to `RegularUser`, they are now able to see all the data without the masking applied. Let's impersonate them once more to confirm that this is the case:
 
 ```sql
 EXECUTE AS USER = 'RegularUser'
@@ -184,13 +173,9 @@ SELECT * FROM Membership
 REVERT 
 ```
 
-Running the query as `RegularUser` will now reveal all the data in its original, unmasked state, showcasing how the `UNMASK` permission enables specific users to view the true data behind the masks. This demonstrates Dynamic Data Masking's role in selectively obscuring data, and how permissions can be used to control access to the underlying information.
+The output shows that masked data will is now revealed for `RegularUser`.
 
-
-
-
-
-By revoking the `UNMASK` permission from `RegularUser`, we enforce the data masking rules again, restricting their access to the original, unmasked data. This operation effectively re-applies the masking functions to the data for `RegularUser`. Here's how to revoke the permission and observe the effect:
+Let's now revoke the `UNMASK` permission from `RegularUser`, which effectively re-applies the masking functions to the data for `RegularUser`:
 
 ```sql
 REVOKE UNMASK FROM RegularUser
@@ -199,24 +184,24 @@ SELECT * FROM Membership
 REVERT 
 ```
 
-After revoking the permission, when `RegularUser` queries the `Membership` table, the data appears masked according to the masking rules defined on the columns. This reinforces the Dynamic Data Masking's capability to protect sensitive information from unauthorized access, ensuring that only users with the `UNMASK` permission can view data in its unmasked form.
-
+Now when `RegularUser` queries the `Membership` table, the data once again appears masked according to the masking rules defined on the columns.
 
 ### Granular DDM Permissions (new in SQL Server 2022)
 
-The granular DDM permissions feature introduced in SQL Server 2022 is a significant enhancement that addresses a major limitation in previous versions. Previously, SQL Server allowed granting or revoking the `UNMASK` permission only at the database level, which limited its flexibility and adoption. However, SQL Server 2022 expands this capability, offering much-needed granularity. Now, administrators can grant or revoke `UNMASK` permissions at various levels, providing tailored access control that matches specific security requirements. 
+The granular DDM permissions feature introduced in SQL Server 2022 is a significant enhancement that addresses a major limitation in earlier versions. Previously, SQL Server allowed granting or revoking the `UNMASK` permission only as a database-wide permission. This meant that a user with the `UNMASK` permission can see the value of every masked column in every table in the database, and this behavior has significantly limited its flexibility and adoption.
 
-This granular control can be applied:
+But now, SQL Server 2022 offers this much-needed granularity. The `UNMASK` permission can now be granted or revoked at various levels, providing tailored access control that matches specific security requirements. 
+
+Specifically, this granular control can be applied at the:
 
 - **Database Level**: As before, affecting all masked columns across the entire database.
-- **Schema Level**: Affecting all tables within a specific schema.
-- **Table Level**: Applying to all columns within a specific table.
-- **Column Level**: The most granular level, targeting individual columns within a table.
+- **Schema Level**: Unmasks all tables within a specific schema.
+- **Table Level**: Unmasks all columns within a specific table.
+- **Column Level**: The most granular level, which unmasks individual columns within a table.
 
-This flexibility greatly enhances the practical use of Dynamic Data Masking by allowing precise control over who can see unmasked data, ensuring that only authorized users can access sensitive information at the level of detail appropriate to their role or needs. Our next demo will focus on showcasing this functionality by granting `UNMASK` permissions at the individual column level.
+This flexibility greatly enhances the practical use of Dynamic Data Masking by allowing precise control over who can see unmasked data, ensuring that only authorized users can access sensitive information at the level of detail appropriate to their role or needs. Our next exercise demonstrates this important new capability:
 
-
-Now we're going to set up a scenario where a specific user, named `ContactUser`, has been tasked with reaching out to members. To facilitate this, they'll need access to certain information that's normally masked, specifically the `FirstName`, `Phone`, and `Email` columns within the `Membership` table. However, they don't require access to the `DiscountCode`, which remains masked. Here's how you can achieve this with granular Dynamic Data Masking permissions in SQL Server 2022:
+Let's create another new user named `ContactUser`, who is tasked with reaching out to members. Thus, they'll need access to some columns that are normally masked, specifically the `FirstName`, `Phone`, and `Email` columns in the `Membership` table. However, they don't require access to the `DiscountCode`, which should remain masked. Run the following code to achieve this:
 
 ```sql
 -- Create a new user called ContactUser with no login
@@ -231,17 +216,15 @@ GRANT UNMASK ON Membership(Phone) TO ContactUser
 GRANT UNMASK ON Membership(Email) TO ContactUser
 ```
 
-By running the above code, we've created `ContactUser` and granted them the `SELECT` permission on the `Membership` table. We've then gone a step further by granting the `UNMASK` permission, but specifically and only for the `FirstName`, `Phone`, and `Email` columns. This allows `ContactUser` to view these normally masked columns in their unmasked state, while the `DiscountCode` remains masked, adhering to the principle of least privilege.
-
-To verify the permissions granted:
+Now query `vwShowUsers` once more to verify the permissions granted:
 
 ```sql
 SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnName
 ```
 
-Querying our permissions view now, you'll see that `ContactUser` has the `UNMASK` permission for just the designated columns, showcasing SQL Server 2022's capability for granular Dynamic Data Masking permissions. This feature significantly enhances the flexibility and practicality of DDM by allowing for more nuanced control over who can see specific pieces of data.
+You can now see that `ContactUser` has the `UNMASK` permission for just the designated columns.
 
-Let's see what happens when `ContactUser` accesses the `Membership` table, particularly focusing on the columns for which they've been granted `UNMASK` permissions:
+Now let's see what happens when `ContactUser` queries the `Membership` table, by running the following code snippet:
 
 ```sql
 -- Impersonate ContactUser to query the Membership table
@@ -250,11 +233,13 @@ SELECT * FROM Membership
 REVERT 
 ```
 
-By executing the code above, you'll notice that `ContactUser` can view the `FirstName`, `Phone`, and `Email` columns without any masking, thanks to the granular `UNMASK` permissions that have been explicitly granted for these columns. However, the `DiscountCode` remains masked, with its values randomized between 1 and 100, demonstrating the effect of the `random()` masking function. This behavior aligns perfectly with our intent for `ContactUser`, allowing them access to the necessary contact information while keeping other sensitive data, like discount codes, masked. Go ahead and run the code multiple times to observe the dynamic masking in action for the `DiscountCode` column, showcasing the effectiveness of SQL Server 2022's granular DDM permissions.
+By executing the code above, you'll notice that `ContactUser` can view the `FirstName`, `Phone`, and `Email` columns without any masking, thanks to the granular `UNMASK` permissions that have been explicitly granted for these columns. However, the `DiscountCode` remains masked, with its values randomized between 1 and 100, demonstrating the effect of the `random()` masking function (run the code snippet multiple times to observe that the `DiscountCode` column is still masked while the other contact-related columns are revealed).
+
+This behavior aligns perfectly with our intent for `ContactUser`, allowing them access to the necessary contact information while keeping other sensitive data, like discount codes, masked.
 
 ## Masking All Data Types
 
-In this demo, we're showcasing Dynamic Data Masking (DDM) capabilities beyond the common string and number data types, illustrating how DDM's `default()` function can fully mask a wide variety of data types, including dates, times, binary data, and even complex CLR types like `XML`, `hierarchyid`, and spatial types like `geometry` and `geography`.
+In this final DDM exercise, let's demonstrate DDM capabilities beyond the common string and number data types, we've been working with thus far:
 
 ```sql
 CREATE TABLE MaskingSample(
@@ -294,77 +279,64 @@ CREATE TABLE MaskingSample(
 )
 ```
 
+This query shows how the `default()` function can fully mask a wide variety of data types, including dates, times, binary data, and even specialized CLR types like `xml`, `hierarchyid`, and spatial types like `geometry` and `geography`.
+
 **Key Points:**
 - The `default()` function is a bit of a misnomer and could have been more aptly named `full()` for clarity, as it fully masks the data, contrary to what the name might suggest.
 - The `default()` function's universality across all data types illustrates its versatility in masking sensitive data, regardless of the data type.
-- The `DEFAULT` constraint in SQL statements is distinct from the DDM `default()` function. The former sets a default value for a column when no specific value is provided when we insert rows into the table.
-- The demonstration highlights DDM's capacity to handle complex data types, such as `XML`, `hierarchyid`, `geography`, and `geometry`, extending the usefulness of DDM beyond basic data types.
+- The `DEFAULT` constraint in SQL statements is distinct from the DDM `default()` function. The former sets a default value for a column if no specific value is provided when we insert rows into the table.
+- DDM is able to mask complex data types, such as `xml`, `hierarchyid`, `geography`, and `geometry`, extending the usefulness of DDM beyond the more primitive data types.
 - The bit data type is considered numeric and can thus use the `random()` function to mask values within the range of 0 to 1.
-- While DDM offers predefined functions for masking, there's no support for custom
 
-To demonstrate Dynamic Data Masking on a variety of data types, we populate the `MaskingSample` table with rows, each labeled from 'Row1' to 'Row6'. The `INSERT` statement only specifies values for the `Label` column, relying on the table's `DEFAULT` constraints to populate the other columns. This approach allows us to observe how DDM behaves with default values across different data types under a variety of masking functions.
+Now populate the `MaskingSample` table with six rows, each labeled from 'Row1' to 'Row6':
 
 ```sql
 INSERT INTO MaskingSample (Label) VALUES
  ('Row1'), ('Row2'), ('Row3'), ('Row4'), ('Row5'), ('Row6')
 ```
 
-By only supplying values for the `Label` column, the table leverages its `DEFAULT` constraints to fill in the other columns, demonstrating the effects of the masking functions on each data type. This setup serves as an illustrative example of DDM's capabilities and limitations with different data types, without requiring explicit values for each column during the insert operation.
+This `INSERT` statement only specifies values for the `Label` column, relying on the table's `DEFAULT` constraints to populate all the other columns that are defined as masked columns.
 
+Next, observe the results of querying the `MaskingSample` table as the `dbo` user:
 
 ```sql
 SELECT * FROM MaskingSample
 ```
 
+In the results, you can see all the data in the `MaskingSample` table unmasked, due to the implicit `UNMASK` permission associated with the `dbo` role. This includes seeing the actual values for all columns, regardless of the mask defined. For example, `varchar`, `char`, and `text` columns masked with the `default()` function show their actual data rather than being fully masked, and numeric columns such as `int`, `bigint`, and `decimal` display their true values instead of random numbers or zero. Similarly, complex types like `xml`, `hierarchyid`, `geography`, and `geometry` are also be fully visible.
 
-
-
-Running as the `dbo` user, you'll see all the data in the `MaskingSample` table unmasked, due to the implicit `UNMASK` permission associated with the `dbo` role. This includes seeing the actual values for all columns, regardless of the mask defined. For example, `varchar`, `char`, and `text` columns masked with the `default()` function will show their actual data rather than being fully masked, and numeric columns such as `int`, `bigint`, and `decimal` will display their true values instead of random numbers or zero. Similarly, complex types like `xml`, `hierarchyid`, `geography`, and `geometry` will also be fully visible.
-
-This behavior emphasizes the importance of the `UNMASK` permission in controlling access to sensitive data. Without it, users see masked data according to the rules defined in the column definitions, effectively obfuscating the information based on the type of masking function applied.
-
-When running this query as `dbo`, all data appears as originally inserted or defined by the `DEFAULT` constraints, demonstrating the unmasking effect of having the appropriate permissions.
-
-
-
-
-
-Now, let's grant `SELECT` permission on the `MaskingSample` table to `RegularUser`, but we won't also grant them the `UNMASK` permission. Then we'll impersonate `RegularUser` and query the `MaskingSample` table again. This time, all the masked columns are obfuscated due to the lack of `UNMASK` permission. As you scroll horizontally through the columns in the result set, take special note of how the `default()` function fully masks columns of different data types, like `datetime2` and `xml`, replacing them with their masked equivalents. Also, observe the `random()` function in action; run the code multiple times to see random numbers generated for numeric columns, including random 0 and 1 values for the bit column. This demonstrates the versatility of the default() function in fully masking a wide variety of data types and the random() function in providing obfuscated yet plausible numeric data.
+Now, let's grant `SELECT` permission on the `MaskingSample` table to `RegularUser`, but we won't also grant them the `UNMASK` permission:
 
 ```sql
 -- View masked data
 GRANT SELECT ON MaskingSample TO RegularUser
+```
 
+Next, impersonate `RegularUser` and query the `MaskingSample` table again:
+
+```sql
 -- As RegularUser, the data is masked
 EXECUTE AS USER = 'RegularUser'
 SELECT * FROM MaskingSample
 REVERT
 ```
 
+This time, all the masked columns are obfuscated due to the lack of `UNMASK` permission. As you scroll horizontally through the columns in the result set, take special note of how the `default()` function fully masks columns of different data types, like `datetime2` and `xml`, replacing them with their masked equivalents. Also, observe the `random()` function in action; run the code snippet multiple times to see random numbers generated for numeric columns, including random 0 and 1 values for the bit column. This demonstrates the versatility of the default() function in fully masking a wide variety of data types and the random() function in providing obfuscated yet plausible numeric data.
+
 ### Cleanup
 
-Let's clean up the objects we've created during this Dynamic Data Masking (DDM) demo:
-
-1. **vwShowUsers**: This view was created to help us list database user names, their associated login names, along with their permissions. Deleting this view cleans up our utility objects.
-2. **RegularUser**: This user was created to demonstrate how data masking works for users without the `UNMASK` permission. Deleting this user cleans up our test users.
-3. **ContactUser**: Similar to RegularUser, this user was created to show granular `UNMASK` permissions on specific columns. Deleting this user further cleans up our test setup.
-4. **Membership**: This table was used to demonstrate the four pre-defined DDM functions. Dropping this table removes our primary example for data masking.
-5. **MaskingSample**: This table was created to demonstrate that the `default()` function can fully mask various data types. Dropping this table cleans up our extended examples for data masking.
-
-Additionally, you might want to delete the entire `MyMaskedDB` database to clean up all resources related to this DDM demo in one go.
-
-Here's the code to perform the cleanup:
+To conclude, let's clean up the objects we've created during this lab:
 
 ```sql
 -- Cleanup
-DROP VIEW IF EXISTS vwShowUsers
-DROP USER IF EXISTS RegularUser
-DROP USER IF EXISTS ContactUser
-DROP TABLE IF EXISTS Membership
-DROP TABLE IF EXISTS MaskingSample
+DROP VIEW vwShowUsers
+DROP USER RegularUser
+DROP USER ContactUser
+DROP TABLE Membership
+DROP TABLE MaskingSample
 ```
 
-This cleanup ensures that all demo-related objects are removed, leaving your environment clean and ready for further exploration or other demos.
+This cleanup ensures that all demo-related objects are removed, restoring your AdventureWorks2019 database to its original state.
 
 ___
 
