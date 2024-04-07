@@ -109,7 +109,7 @@ SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnNa
 
 From the results returned by this view, it becomes apparent that there is only one explicitly listed permission for the `dbo` user, which is the ability to connect to the database. However, as already mentioned, the `dbo` user inherently possesses all permissions within the database, and that of course includes the `UNMASK` permission. Thus, connected as the `dbo` user, we can see the actual data in columns that have been masked using Dynamic Data Masking (DDM), without the masking being applied.
 
-### Create New User `RegularUser`
+### Create New User 'RegularUser'
 
 So let's create a new "ordinary" user named `RegularUser`:
 
@@ -133,7 +133,7 @@ SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnNa
 ```
 And now the view reveals that `RegularUser` now has the ability to `SELECT` from the `Membership` table.
 
-## Impersonating `RegularUser`
+## Impersonating 'RegularUser'
 
 By utilizing the `EXECUTE AS USER` command, we can temporarily impersonate the `RegularUser` within our current connection. This allows us to query the `Membership` table and observe how data masking affects the visibility of its data from the perspective of `RegularUser` instead of `dbo`. After running the query, we can use `REVERT` to return to our original `dbo` user context. This practice is particularly useful for testing how different users experience data access and visibility.
 
