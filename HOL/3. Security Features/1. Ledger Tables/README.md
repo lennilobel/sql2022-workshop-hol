@@ -12,4 +12,4 @@ When you open a query window in SSMS to start working on the first lab, leave it
 
 ___
 
-[Lab: Ledger - Append-Only Ledger Tables ▶](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/3.%20Security%20Features/1.%20Ledger%20Tables/1.%20Append-Only%20Ledger%20Tables.md)
+▶ [Lab: Ledger - Append-Only Ledger Tables](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/3.%20Security%20Features/1.%20Ledger%20Tables/1.%20Append-Only%20Ledger%20Tables.md)

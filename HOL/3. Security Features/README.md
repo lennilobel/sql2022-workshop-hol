@@ -13,4 +13,4 @@ This labs in this section dive into several robust security features available i
 By understanding and utilizing these security features, you can significantly enhance the security of your SQL Server databases, protecting your data from unauthorized access, disclosure, or tampering.
 ___
 
-[Ledger Tables ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/1.%20Ledger%20Tables)
+[Ledger Tables](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/1.%20Ledger%20Tables)

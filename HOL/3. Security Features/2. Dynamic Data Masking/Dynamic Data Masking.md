@@ -340,5 +340,5 @@ This cleanup ensures that all lab-related objects are removed, restoring your Ad
 
 ___
 
-[Row-Level Security (RLS) ▶](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security)
+[Row-Level Security (RLS)](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/3.%20Security%20Features/3.%20Row%20Level%20Security)
 

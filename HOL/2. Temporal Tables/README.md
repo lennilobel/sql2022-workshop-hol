@@ -14,4 +14,4 @@ When you open a query window in SSMS to start working on the first lab, leave it
 
 ___
 
-[Lab: Temporal Tables - Creating a Temporal Table ▶](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/2.%20Temporal%20Tables/1.%20Creating%20Temporal%20Tables.md)
+▶ [Lab: Temporal Tables - Creating a Temporal Table](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/2.%20Temporal%20Tables/1.%20Creating%20Temporal%20Tables.md)
