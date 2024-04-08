@@ -2,7 +2,7 @@
 
 Row-Level Security (RLS) allows for the fine-grained restriction of rows in a table, based on user identities. This security feature lets you create policies that dynamically filter data so that users only see the data that they are authorized to view, directly at the database level. RLS simplifies the design of applications by embedding data access logic within the database itself, thereby enhancing security and reducing the risk of accidental data exposure. It is particularly useful in multi-user environments where users need to access a common database but should only see data relevant to their role or department.
 
-You will learn how to leverage Row-Level Security by working through three labs, which are designed to be followed in sequence
+You will learn how to leverage Row-Level Security by working through three labs, which are designed to be followed in sequence:
 
 - **Introduction to Row-Level Security with a Read-Only Policy**: Start with the basics of implementing RLS by creating a read-only policy. This lab focuses on configuring RLS for different sales users, ensuring they can only access the sales data pertinent to their accounts.
   
