@@ -163,7 +163,7 @@ SELECT * FROM vwShowUsers ORDER BY Username, PermissionName, TableName, ColumnNa
 
 Now the view reveals that `RegularUser` possesses both `SELECT` permission on the `Membership` table, as well as the database-wide `UNMASK` permission:
 
-> Note that, typically, you would assign the `UNMASK` permission to a role rather than to each individual user. Then, every user added as a member of that role would inherit the `UNMASK` permission. We're only granting permission at the user level in this demo to keep things simple without detracting from the way Dynamic Data Masking (DDM) works.
+> Note that, typically, you would assign the `UNMASK` permission to a role rather than to each individual user. Then, every user added as a member of that role would inherit the `UNMASK` permission. We're only granting permission at the user level in this exercise to keep things simple without detracting from the way Dynamic Data Masking (DDM) works.
 
 By granting the `UNMASK` permission to `RegularUser`, they are now able to see all the data without the masking applied. Let's impersonate them once more to confirm that this is the case:
 
@@ -336,7 +336,7 @@ DROP TABLE Membership
 DROP TABLE MaskingSample
 ```
 
-This cleanup ensures that all demo-related objects are removed, restoring your AdventureWorks2019 database to its original state.
+This cleanup ensures that all lab-related objects are removed, restoring your AdventureWorks2019 database to its original state.
 
 ___
 

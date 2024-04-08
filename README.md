@@ -34,7 +34,7 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
    The restoration process will begin, and SSMS will display a progress bar. Once the process completes, a message will appear informing you that the database has been successfully restored. Click OK, and the AdventureWorks2019 database will appear in the Databases folder in Object Explorer.
 
-5. **Wide World Importers Database**: One demo uses the Wide World Importers sample database. Download the `WideWorldImporters.bak` backup file file available [here](https://1drv.ms/f/s!AiiTRkT0Yvc4xd8Kz1oSgzjbselEIA?e=yFaqjc) (right-click and open in a new tab).
+5. **Wide World Importers Database**: One lab uses the Wide World Importers sample database. Download the `WideWorldImporters.bak` backup file file available [here](https://1drv.ms/f/s!AiiTRkT0Yvc4xd8Kz1oSgzjbselEIA?e=yFaqjc) (right-click and open in a new tab).
 
    Then restore the database using similar steps you just followed for AdventureWorks2019:
 
