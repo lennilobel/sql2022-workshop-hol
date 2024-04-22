@@ -8,7 +8,7 @@ Before diving into the hands-on labs, ensure you have the necessary software and
 
 2. **SQL Server Management Studio (SSMS)**: To interact with SQL Server, including running queries and managing databases, install the latest version of SSMS. This ensures compatibility with SQL Server 2022 and supports features like Always Encrypted that may not be supported in older SSMS versions. Download SSMS from [here](https://aka.ms/ssmsfullsetup) (right-click and open in a new tab).
 
-3. **Visual Studio 2022**: Some demos, especially those involving Row-Level Security and Always Encrypted, require Visual Studio 2022. The Community Edition is free for students, open-source contributors, and individuals. Download it from [Visual Studio's Community Edition page](https://visualstudio.microsoft.com/vs/community/) (right-click and open in a new tab).
+3. **Visual Studio 2022 (any edition) with .NET desktop development workload**: Some demos, especially those involving Row-Level Security and Always Encrypted, require Visual Studio 2022. The Community Edition is free for students, open-source contributors, and individuals. Download it from [Visual Studio's Community Edition page](https://visualstudio.microsoft.com/vs/community/) (right-click and open in a new tab). During installation, choose the ".NET desktop development workload."
 
 4. **AdventureWorks2019 Database**: Many demos utilize the AdventureWorks2019 sample database. Download the `AdventureWorks2019.bak` backup file available [here](https://1drv.ms/f/s!AiiTRkT0Yvc4xd8Kz1oSgzjbselEIA?e=yFaqjc) (right-click and open in a new tab).
 
