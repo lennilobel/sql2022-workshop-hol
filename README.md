@@ -1,10 +1,12 @@
-﻿# Hands-On Lab: SQL Server 2022 for Developers
+﻿# Visual Studio Live! Chicago
+
+### Hands-On Lab: SQL Server 2022 for Developers
 
 Welcome!
 
 Before diving into the hands-on labs, ensure you have the necessary software and databases installed. Follow these steps to set up your environment:
 
-1. **SQL Server 2022**: The Developer Edition of SQL Server 2022 is required for this lab. It's free for development and testing, not for production, and includes all the features of SQL Server 2022. Download and install it from [Microsoft's SQL Server Downloads page](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (right-click and open in a new tab). When the installer starts, choose the **Basic** installation option.
+1. **SQL Server 2022**: A local instance of SQL Server 2022 is required for the labs. The Developer Edition of SQL Server 2022 is free for development and testing, not for production, and includes all the features of SQL Server 2022. Download and install it from [Microsoft's SQL Server Downloads page](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (right-click and open in a new tab). When the installer starts, choose the **Basic** installation option.
 
 2. **SQL Server Management Studio (SSMS)**: To interact with SQL Server, including running queries and managing databases, install the latest version of SSMS. This ensures compatibility with SQL Server 2022 and supports features like Always Encrypted that may not be supported in older SSMS versions. Download SSMS from [here](https://aka.ms/ssmsfullsetup) (right-click and open in a new tab).
 
