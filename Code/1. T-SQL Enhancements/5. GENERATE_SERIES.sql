@@ -1,6 +1,7 @@
 ﻿-- GENERATE_SERIES Function
 
 USE AdventureWorks2019
+GO
 
 -- *** Transition from Recursive CTEs to GENERATE_SERIES
 
@@ -42,6 +43,8 @@ SELECT
   TheDate = DATEADD(DAY, value, @StartOn)
 FROM
   GENERATE_SERIES(0, @DayCount)
+
+GO
 
 -- *** Scenario: Reporting on Sales Data with Unpopulated Intervals
 
@@ -87,6 +90,8 @@ FROM
     SalesAtHourCte
 GROUP BY
     OrderHour
+
+GO
 
 -- Using GENERATE_SERIES for comprehensive coverage
 

@@ -19,6 +19,7 @@ SELECT
     GreatestNumeric = GREATEST(@NumericValue1, @NumericValue2, @NumericValue3),
     GreatestString  = GREATEST(@StringValue1, @StringValue2, @StringValue3)
 
+GO
 -- *** Comparison with Pre-2022 Approach Using CASE Statements
 
 DECLARE @NumericValue1 varchar(max) = '6.62'

@@ -18,6 +18,7 @@ SELECT
     DATETRUNC(HOUR, @dt) AS TruncateToHour,
     DATETRUNC(DAY, @dt) AS TruncateToDay
 
+GO
 -- *** Comprehensive DateTime Truncation
 
 DECLARE @dt datetime2 = '2023-05-17T11:30:15.1234567' -- Wednesday
@@ -34,11 +35,3 @@ SELECT 'TruncateToWeek',        DATETRUNC(WEEK, @dt)         UNION ALL	-- Week s
 SELECT 'TruncateToMonth',       DATETRUNC(MONTH, @dt)        UNION ALL
 SELECT 'TruncateToQuarter',     DATETRUNC(QUARTER, @dt)      UNION ALL
 SELECT 'TruncateToYear',        DATETRUNC(YEAR, @dt)
-
--- Also note that, in the context of weeks, the function provides two options: `ISO_WEEK` and `WEEK`. Here's the distinction between them:
-
--- - **TruncateToIsoWeek**: Using the `ISO_WEEK` parameter with `DATETRUNC` truncates the datetime to the start of the ISO week, which is always Monday.
-
--- - **TruncateToWeek**: The `WEEK` parameter, on the other hand, truncates the datetime to the start of the week based on the SQL Server's default setting, which is usually Sunday in the United States. However, this starting day of the week can be altered using the `SET DATEFIRST` statement.
-
--- This distinction is important for accurately performing weekly data analysis and ensuring that the week boundaries align with the intended standard or operational definition of a week. In this case, our `@dt` parameter is set to 5/17/2023, which is a Wednesday. Thus, `ISO_WEEK` returns 5/15 (the prior Monday), while `WEEK` returns 5/14 (the prior Sunday).

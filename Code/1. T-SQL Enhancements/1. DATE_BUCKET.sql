@@ -16,7 +16,6 @@ SELECT
     '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-06'), @Origin),
     '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-07'), @Origin),
     '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-08'), @Origin)
-
 GO
 
 -- Now run the same code with a different origin date.
@@ -31,6 +30,7 @@ SELECT
     '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-06'), @Origin),
     '1/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-07'), @Origin),
     '2/2d' = DATE_BUCKET(DAY, 2, CONVERT(date, '2022-01-08'), @Origin)
+GO
 
 -- *** Three-day Bucket
 
@@ -44,6 +44,7 @@ SELECT
     '3/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-06'), @Origin),
     '1/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-07'), @Origin),
     '2/3d' = DATE_BUCKET(DAY, 3, CONVERT(date, '2022-01-08'), @Origin)
+GO
 
 -- *** One-week Bucket
 
@@ -57,6 +58,7 @@ SELECT
     '6/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-06'), @Origin),
     '7/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-07'), @Origin),
     '1/1w' = DATE_BUCKET(WEEK, 1, CONVERT(date, '2022-01-08'), @Origin)
+GO
 
 -- *** One-month Bucket
 
@@ -70,6 +72,7 @@ SELECT
     'Jun/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-06-30'), @Origin),
     'Jul/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-07-15'), @Origin),
     'Aug/1m' = DATE_BUCKET(MONTH, 1, CONVERT(date, '2022-08-30'), @Origin)
+GO
 
 -- *** Three-month Bucket
 
@@ -83,6 +86,7 @@ SELECT
     'Jun/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-06-30'), @Origin),
     'Jul/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-07-15'), @Origin),
     'Aug/3m' = DATE_BUCKET(MONTH, 3, CONVERT(date, '2022-08-30'), @Origin)
+GO
 
 -- *** Simplify Week Boundary Calculations
 

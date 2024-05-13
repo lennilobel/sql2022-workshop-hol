@@ -4,12 +4,12 @@ USE AdventureWorks2019
 
 -- *** Basic Usage of STRING_SPLIT
 
--- **SQL Server 2016 and later:**
+-- SQL Server 2016 and later:
 
 SELECT *
 FROM STRING_SPLIT('Bravo/Alpha/Tango/Delta', '/')
 
--- **Enhancement in SQL Server 2022:**
+-- Enhancement in SQL Server 2022:
 
 SELECT *
 FROM STRING_SPLIT('Bravo/Alpha/Tango/Delta', '/', 1)
@@ -22,7 +22,7 @@ SELECT
 FROM
     STRING_SPLIT('Bravo/Alpha/Bravo/Tango/Delta/Bravo/Alpha/Delta', '/', 1)
 
--- Use `MIN(ordinal)` with `GROUP BY` to dedupe while maintaining original sequence:
+-- Use MIN with GROUP BY to dedupe while maintaining original sequence
 
 SELECT
     value,
@@ -34,7 +34,7 @@ GROUP BY
 ORDER BY
     ordinal
 
--- Use `STRING_AGG` to reconstruct the string from the deduplicated elements, while preserving their original order.
+-- Use STRING_AGG to reconstruct the string from the deduplicated elements, while preserving their original order
 
 ;WITH SplitCte AS (
     SELECT

@@ -1,10 +1,10 @@
 ﻿--TRIM Function Enhancements
 
--- - **SQL Server 2017:** Introduced the `TRIM` function, allowing for the removal of spaces or specified characters from a string.
+-- SQL Server 2017: Introduced the `TRIM` function, allowing for the removal of spaces or specified characters from a string.
   
   SELECT TRIM('   text with extra leading and trailing spaces   ') AS TrimmedText
 
--- - **SQL Server 2022:** Enhances the `TRIM` function with `BOTH`, `LEADING`, and `TRAILING` keywords, offering precise control over the trimming operation and making `LTRIM` and `RTRIM` effectively redundant.
+-- SQL Server 2022: Enhances the `TRIM` function with `BOTH`, `LEADING`, and `TRAILING` keywords
 
 -- TRIM spaces by default (as in SQL Server 2017)
 SELECT TRIM('    Hello, World!    ') AS DefaultTrim

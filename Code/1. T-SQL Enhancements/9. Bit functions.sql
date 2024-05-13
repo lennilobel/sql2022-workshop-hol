@@ -1,12 +1,9 @@
 ﻿-- Bit Manipulation Enhancements in SQL Server 2022
 
--- SQL Server 2022 adds a set of operators dedicated to bit manipulation, significantly easing operations such as bit masking, and bitwise AND, OR, NOT operations, along with shifting bits left or right. This feature is particularly useful in scenarios where data compression (for example, storing two 4-bit values as as single 8-bit byte) or encoding (for example, storing eight boolean values as as single 8-bit byte) is required. Below is a demonstration utilizing these new capabilities to encode eight possible color selections and pack two numerical values into a single byte.
+-- SQL Server 2022 adds a set of operators dedicated to bit manipulation, significantly easing operations such as bit masking, and bitwise AND, OR, NOT operations, along with shifting bits left or right. This feature is particularly useful in scenarios where data compression (for example, storing two 4-bit values as as single 8-bit byte) or encoding (for example, storing eight boolean values as as single 8-bit byte) is required.
 
 USE AdventureWorks2019
-
--- *** Create and Populate the Customer Table
-
--- First, create a `Customer` table to hold customer information, including our customer's color selections, and a pair of numerical values, each fitting within a byte. We use the `0x` prefix on each byte value to express values in hexadecimal.
+GO
 
 CREATE TABLE Customer (
   CustomerId   int IDENTITY PRIMARY KEY,
@@ -48,8 +45,6 @@ SELECT
 FROM
   Customer
 
--- In this example, `BIT_COUNT` returns the count of set bits (1s), and `GET_BIT` checks for specific bit positions within the byte. `RIGHT_SHIFT` and bitwise AND `&` operations are used to extract the 'min' and 'max' values encoded within a single byte.
-
--- *** Cleanup
+-- Cleanup
 
 DROP TABLE Customer
