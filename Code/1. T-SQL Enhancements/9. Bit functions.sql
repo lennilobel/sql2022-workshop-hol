@@ -1,18 +1,13 @@
-﻿# Bit Manipulation Enhancements in SQL Server 2022
+﻿-- Bit Manipulation Enhancements in SQL Server 2022
 
-SQL Server 2022 adds a set of operators dedicated to bit manipulation, significantly easing operations such as bit masking, and bitwise AND, OR, NOT operations, along with shifting bits left or right. This feature is particularly useful in scenarios where data compression (for example, storing two 4-bit values as as single 8-bit byte) or encoding (for example, storing eight boolean values as as single 8-bit byte) is required. Below is a demonstration utilizing these new capabilities to encode eight possible color selections and pack two numerical values into a single byte.
+-- SQL Server 2022 adds a set of operators dedicated to bit manipulation, significantly easing operations such as bit masking, and bitwise AND, OR, NOT operations, along with shifting bits left or right. This feature is particularly useful in scenarios where data compression (for example, storing two 4-bit values as as single 8-bit byte) or encoding (for example, storing eight boolean values as as single 8-bit byte) is required. Below is a demonstration utilizing these new capabilities to encode eight possible color selections and pack two numerical values into a single byte.
 
-Start by pressing `CTRL+N` to open a new query window for this lab in SSMS. Then switch to the AdventureWorks2019 database:
-
-```sql
 USE AdventureWorks2019
-```
 
 -- *** Create and Populate the Customer Table
 
-First, create a `Customer` table to hold customer information, including our customer's color selections, and a pair of numerical values, each fitting within a byte. We use the `0x` prefix on each byte value to express values in hexadecimal.
+-- First, create a `Customer` table to hold customer information, including our customer's color selections, and a pair of numerical values, each fitting within a byte. We use the `0x` prefix on each byte value to express values in hexadecimal.
 
-```sql
 CREATE TABLE Customer (
   CustomerId   int IDENTITY PRIMARY KEY,
   FirstName    varchar(50),
@@ -28,13 +23,11 @@ INSERT INTO Customer
   ('Roberto',    'Tamburello', 0x60,    0x7E),
   ('Rob',        'Walters',    0x9E,    0x9E),
   ('Gail',       'Erickson',   0xFF,    0xFF)
-```
 
 -- *** Bitwise Operations and Aggregations
 
-The query demonstrates the extraction and manipulation of bits within the `Colors` and `MinMax` columns:
+-- The query demonstrates the extraction and manipulation of bits within the `Colors` and `MinMax` columns:
 
-```sql
 SELECT
   FirstName,
   Colors,
@@ -54,18 +47,9 @@ SELECT
   Max        = MinMax & 0x0F
 FROM
   Customer
-```
 
-In this example, `BIT_COUNT` returns the count of set bits (1s), and `GET_BIT` checks for specific bit positions within the byte. `RIGHT_SHIFT` and bitwise AND `&` operations are used to extract the 'min' and 'max' values encoded within a single byte.
+-- In this example, `BIT_COUNT` returns the count of set bits (1s), and `GET_BIT` checks for specific bit positions within the byte. `RIGHT_SHIFT` and bitwise AND `&` operations are used to extract the 'min' and 'max' values encoded within a single byte.
 
 -- *** Cleanup
 
-To cleanup, drop the Customer table:
-
-```sql
 DROP TABLE Customer
-```
-
-___
-
-▶ [Temporal Tables](https://github.com/lennilobel/sql2022-workshop-hol/tree/main/HOL/2.%20Temporal%20Tables)
