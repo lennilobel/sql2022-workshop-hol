@@ -1,0 +1,273 @@
+﻿# Windowing Enhancements
+
+-- Now let's explore two windowing enhancements introduced in SQL Server 2022: the `WINDOW` clause, and the `IGNORE NULLS` syntax added to the `FIRST_VALUE` and `LAST_VALUE` window functions.
+
+USE AdventureWorks2019
+
+-- *** The WINDOW Clause
+
+-- Let's start with the new `WINDOW` clause. First, we'll populate some sample data. The following code creates a table named `TxnData` and populates it with transaction data for three different accounts. This dataset will be useful for exploring the use of window functions and their enhancements in SQL Server 2022.
+
+CREATE TABLE TxnData (
+  AcctId int,
+  TxnDate date,
+  Amount decimal
+)
+
+INSERT INTO TxnData (AcctId, TxnDate, Amount) VALUES
+  (1, DATEFROMPARTS(2021, 8, 10), 500),  -- 5 transactions for account 1
+  (1, DATEFROMPARTS(2021, 8, 22), 250),
+  (1, DATEFROMPARTS(2021, 8, 24), 75),
+  (1, DATEFROMPARTS(2021, 8, 26), 125),
+  (1, DATEFROMPARTS(2021, 8, 28), 175),
+  (2, DATEFROMPARTS(2021, 8, 11), 500),  -- 8 transactions for account 2
+  (2, DATEFROMPARTS(2021, 8, 15), 50),
+  (2, DATEFROMPARTS(2021, 8, 22), 5000),
+  (2, DATEFROMPARTS(2021, 8, 25), 550),
+  (2, DATEFROMPARTS(2021, 8, 27), 105),
+  (2, DATEFROMPARTS(2021, 8, 27), 95),
+  (2, DATEFROMPARTS(2021, 8, 29), 100),
+  (2, DATEFROMPARTS(2021, 8, 30), 2500),
+  (3, DATEFROMPARTS(2021, 8, 14), 500),  -- 4 transactions for account 3
+  (3, DATEFROMPARTS(2021, 8, 15), 600),
+  (3, DATEFROMPARTS(2021, 8, 22), 25),
+  (3, DATEFROMPARTS(2021, 8, 23), 125)
+
+-- ***# Purpose of the Script:
+
+- **Educational Foundation**: This script serves as a foundation for practicing and understanding windowing functions.
+- **Window Functions Analysis**: By analyzing transactions across different accounts and dates, you can learn how window functions operate over a set of rows, providing insights into running totals, moving averages, and other analytical operations.
+- **Exploring SQL Server 2022 Enhancements**: The dataset is specifically designed to explore the new `WINDOW` clause for more readable and maintainable SQL queries.
+
+-- ***# Exploring Running and Sliding Aggregations in SQL Server with Note on Code Duplication
+
+The following SQL query leverages window functions for conducting running and sliding aggregations on our dataset of transactions across different accounts. These operations are made possible by the `OVER` clause paired with `PARTITION BY` and `ORDER BY` subclauses, facilitating the calculation of averages, counts, minimums, maximums, and sums, relative to the rows in the specified window.
+
+```sql
+-- OVER with ORDER BY for aggregate functions (SQL 2012+) enables running/sliding aggregations
+SELECT AcctId, TxnDate, Amount,
+  -- Running aggregations at the account level, all account rows per window
+  RAvg = AVG(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate),
+  RCnt = COUNT(*)    OVER (PARTITION BY AcctId ORDER BY TxnDate),
+  RMin = MIN(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate),
+  RMax = MAX(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate),
+  RSum = SUM(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate),
+  -- Sliding aggregations at the account level, max three account rows per window
+  SAvg = AVG(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SCnt = COUNT(*)    OVER (PARTITION BY AcctId ORDER BY TxnDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SMin = MIN(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SMax = MAX(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SSum = SUM(Amount) OVER (PARTITION BY AcctId ORDER BY TxnDate ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+FROM TxnData
+ORDER BY AcctId, TxnDate
+```
+
+-- ***# Running and Sliding Aggregations
+
+- **Running Aggregations (R Prefix)**: Denote cumulative totals or averages up to the current row (transaction) within each partition (account), providing insight into the evolving trends.
+  
+- **Sliding Aggregations (S Prefix)**: Apply to a fixed range of rows around the current row within each partition, offering a snapshot of trends over a specified interval.
+
+This SQL query uses the `OVER` clause with `PARTITION BY` and `ORDER BY` to compute both running (cumulative) and sliding (moving) aggregations for transactions (`TxnData`) grouped by `AcctId`. These aggregations are calculated separately for each account, as indicated by the partition. Let's understand what you can expect to see in both the running and sliding aggregation columns:
+
+-- ***# Running Aggregations (Prefixed with R)
+
+1. **RAvg**: This column shows the running average of the `Amount` for each account up to the current row, in date order. As you move down the rows for an account, this value recalculates to include all previous transactions' amounts up to that point.
+
+2. **RCnt**: Displays the running count of transactions for each account up to the current row. It effectively shows how many transactions have occurred for each account up to and including that transaction date.
+
+3. **RMin**: Shows the minimum transaction `Amount` from the start up to the current transaction for each account. If a transaction with a lower amount than the current minimum occurs later, this value will adjust accordingly.
+
+4. **RMax**: Indicates the maximum transaction `Amount` from the start up to the current transaction for each account. It updates if a later transaction has a higher amount than the current maximum.
+
+5. **RSum**: Represents the running total (sum) of the transaction amounts for each account up to the current row (transaction date). It cumulatively adds up the amounts of all transactions up to that point.
+
+-- ***# Sliding Aggregations (Prefixed with S)
+
+The sliding aggregations are calculated within a window defined by the current row and the two preceding rows for each account.
+
+1. **SAvg**: This column calculates the average transaction `Amount` within the sliding window for each account. It only considers the current transaction and the two immediately preceding transactions (if available) for the average calculation.
+
+2. **SCnt**: Shows the count of transactions within the sliding window. This value will be up to 3, depending on how many transactions (including the current one) fall within the window.
+
+3. **SMin**: Displays the minimum transaction `Amount` within the sliding window. It looks at the current transaction and up to two transactions before it to find the minimum amount.
+
+4. **SMax**: Indicates the maximum transaction `Amount` within the sliding window. Similar to `SMin`, it assesses the current transaction and the two preceding it (if they exist) to find the maximum amount.
+
+5. **SSum**: Represents the sum of transaction amounts within the sliding window. It adds up the amounts of the current transaction and up to two preceding transactions to calculate this total.
+
+Thus, the running aggregations provide a cumulative view of transaction data for each transaction date across each entire account. In contrast, the sliding aggregations offer a narrower, more focused view per account, recalculating for each row based on the defined window of the current and two preceding transactions. This allows for analyzing trends and changes over a shorter, specified interval.
+
+-- ***# Note on Code Duplication
+
+A notable aspect of this query is the duplication within the `OVER` clauses across multiple lines. Each aggregation function (`AVG`, `COUNT`, `MIN`, `MAX`, `SUM`) repeats the same `OVER` clause setup, specifying `PARTITION BY` and `ORDER BY` for both running and sliding aggregations. This redundancy can lead to longer, less maintainable SQL scripts, particularly as the complexity of the queries and windowing logic increases.
+
+SQL Server 2022 addresses this concern by introducing the `WINDOW` clause, allowing for the definition of reusable named window frames. This enhancement significantly reduces code duplication and improves both readability and maintainability by enabling the specification of common windowing elements (like partitioning and ordering criteria) in a single, centralized location within the query.
+
+-- ***# Leveraging SQL Server 2022 WINDOW Clause for Enhanced Readability
+
+SQL Server 2022 introduces the `WINDOW` clause, a feature for defining reusable window frames in windowing functions. This enhancement facilitates a cleaner and more maintainable approach for running and sliding aggregations, as demonstrated in the following examples.
+
+-- ***-- *** Query Using the WINDOW Clause
+
+This query is functionally equivalent to the previous one, but uses the new `WINDOW` clause to reduce code duplication for the running and sliding aggregations.
+
+```sql
+SELECT AcctId, TxnDate, Amount,
+  -- Running aggregations at the account level, all account rows per window
+  RAvg = AVG(Amount) OVER win,
+  RCnt = COUNT(*)    OVER win,
+  RMin = MIN(Amount) OVER win,
+  RMax = MAX(Amount) OVER win,
+  RSum = SUM(Amount) OVER win,
+  -- Sliding aggregations at the account level, max three account rows per window
+  SAvg = AVG(Amount) OVER (win ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SCnt = COUNT(*)    OVER (win ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SMin = MIN(Amount) OVER (win ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SMax = MAX(Amount) OVER (win ROWS BETWEEN 2 PRECEDING AND CURRENT ROW),
+  SSum = SUM(Amount) OVER (win ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+FROM TxnData
+WINDOW
+  win AS (PARTITION BY AcctId ORDER BY TxnDate)
+ORDER BY AcctId, TxnDate
+```
+
+In this query, a single `WINDOW` clause named `win` is defined to partition data by `AcctId` and order it by `TxnDate`, applicable to both running (R) and sliding (S) aggregations. This already reduces the repetition seen in the pre-2022 version. However, for sliding aggregations, the clause `(win ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)` is still repeated.
+
+-- ***-- *** Using Two Named Windows
+
+This next query uses the `WINDOW` clause to define to named windows and eliminate all the duplication in both the running and sliding aggregation columns:
+
+```sql
+SELECT AcctId, TxnDate, Amount,
+  -- Running aggregations at the account level, all account rows per window
+  RAvg = AVG(Amount) OVER winRunning,
+  RCnt = COUNT(*)    OVER winRunning,
+  RMin = MIN(Amount) OVER winRunning,
+  RMax = MAX(Amount) OVER winRunning,
+  RSum = SUM(Amount) OVER winRunning,
+  -- Sliding aggregations at the account level, max three account rows per window
+  SAvg = AVG(Amount) OVER winSliding,
+  SCnt = COUNT(*)    OVER winSliding,
+  SMin = MIN(Amount) OVER winSliding,
+  SMax = MAX(Amount) OVER winSliding,
+  SSum = SUM(Amount) OVER winSliding
+FROM TxnData
+WINDOW
+  winRunning AS (PARTITION BY AcctId ORDER BY TxnDate),
+  winSliding AS (winRunning ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+ORDER BY AcctId, TxnDate
+```
+
+This version further improves the query's readability and maintainability by defining two named `WINDOW` clauses: `winRunning` for running aggregations and `winSliding` for sliding aggregations based on `winRunning`. This approach entirely eliminates the need to repeat the `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` clause for each sliding aggregation.
+
+These examples illustrate how SQL Server 2022's `WINDOW` clause not only reduces the redundancy of window specifications in complex queries but also significantly improves their readability and maintainability.
+
+-- *** IGNORE VALUES on FIRST_VALUE and LAST_VALUE
+
+`FIRST_VALUE` and `LAST_VALUE` are windowing functions in SQL that return the first and last values in a specified range according to the order defined in the `OVER` clause. These functions can be very useful for analytics, allowing you to easily retrieve the earliest or latest value among a group of rows in an ordered window.
+
+A common issue with these functions arises when dealing with NULLs in the data. By default, `FIRST_VALUE` and `LAST_VALUE` respect NULLs, meaning that if the first or last value in the window according to the specified order is NULL, then NULL is returned. This can be problematic when you're interested in the first or last non-NULL value in the window.
+
+Let's demonstrate this with an example. The `StockByDate` table stores one row for each product/date combination, with a quantity column for each product's stock on any given date:
+
+```sql
+CREATE TABLE StockByDate (
+  StockDate date,
+  ProductID int,
+  Quantity int
+)
+
+INSERT INTO StockByDate
+ (StockDate,     ProductID,   Quantity) VALUES
+ ('2021-03-18',  142,         74),
+ ('2021-04-11',  123,         95),	-- Product 123's highest quantity (95) stock date is 4/11/2021
+ ('2021-04-12',  101,         38),
+ ('2021-05-21',  130,         12),
+ ('2021-05-30',  101,         28),
+ ('2021-07-25',  123,         57),
+ ('2021-07-28',  101,         12)	-- Product 101's lowest quantity (12) stock date is 7/28/2021
+```
+
+This table has one row for each combination of stock date and product, showing the available stock of each product on each date. Now run this query with `FIRST_VALUE` and `LAST_VALUE` windowing functions:
+
+```sql
+SELECT
+  StockDate,
+  ProductID,
+  Quantity,
+  LowestOn  = FIRST_VALUE(StockDate) OVER win,
+  HighestOn = LAST_VALUE(StockDate)  OVER win
+ FROM StockByDate
+ WINDOW win AS (PARTITION BY ProductID ORDER BY Quantity ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ ORDER BY StockDate
+```
+
+The results show `LowestOn` and `HighestOn` columns respectively, with the stock dates for the smallest and largest quantities for each product.
+
+Now, introduce NULLs into the stock date. This column should normally never contain NULL, so any rows with a NULL stock date are considered invalid, and should be excluded from each product window in the query. Note how these are the same products and quantities as the previous query, only now notice how product 123's highest quantity is 95, but has a NULL stock date. Also notice how product 101's lowest quantity is 12, and it also has a NULL stock date.:
+
+```sql
+DELETE FROM StockByDate
+
+INSERT INTO StockByDate
+ (StockDate,     ProductID,   Quantity) VALUES
+ ('2021-03-18',  142,         74),
+ (NULL,          123,         95),	-- Product 123's highest quantity (95) stock date is NULL
+ ('2021-04-12',  101,         38),
+ ('2021-05-30',  101,         28),
+ ('2021-05-21',  130,         12),
+ ('2021-07-25',  123,         57),
+ (NULL,          101,         12)	-- Product 101's lowest quantity (12) stock date is NULL
+```
+
+Now run the same query again:
+
+```sql
+SELECT
+  StockDate,
+  ProductID,
+  Quantity,
+  LowestOn  = FIRST_VALUE(StockDate) OVER win,
+  HighestOn = LAST_VALUE(StockDate)  OVER win
+ FROM StockByDate
+ WINDOW win AS (PARTITION BY ProductID ORDER BY Quantity ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ ORDER BY StockDate
+```
+
+This time, for products 101 and 123, the `LowestOn` and `HighestOn` values respectively will be NULL due to the presence of NULLs in `StockDate` for the smallest and largest quantities of those products.
+
+To address this issue, SQL Server 2022 introduces the `IGNORE NULLS` syntax for these windowing functions. The following query simply adds `IGNORE NULLS` to the windowing syntax for the `LowestOn` and `HighestOn` columns:
+
+```sql
+SELECT
+  StockDate,
+  ProductID,
+  Quantity,
+  LowestOn  = FIRST_VALUE(StockDate) IGNORE NULLS OVER win,
+  HighestOn = LAST_VALUE(StockDate)  IGNORE NULLS OVER win
+ FROM StockByDate
+ WINDOW win AS (PARTITION BY ProductID ORDER BY Quantity ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ ORDER BY StockDate
+```
+
+(Never mind if SSMS draws red squiggly lines on parts of this query. This is misleading, since the syntax is correct. Sometimes, however, it takes SSMS some time to catch up with new T-SQL syntax introduced in new versions of SQL Server.)
+
+Using `IGNORE NULLS`, the functions now skip over NULL values and return the first or last non-NULL value in the specified range. This can significantly improve the utility of `FIRST_VALUE` and `LAST_VALUE` in analyses where NULLs are present but you're interested in actual data values.
+
+Also note the use of the new `WINDOW` clause we learned about at the start of this lab to define the window as `win`, which is then applied to both the `FIRST_VALUE` and `LAST_VALUE` functions with `OVER win`.
+
+Make sure you understand the tradeoff here; without `IGNORE NULLS`, these values may return NULL for the truly lowest and highest stock dates. Using `IGNORE NULLS`, these values will never return NULL, but they will also ignore the lowest and highest stock dates in the event that they contain NULL.
+
+-- *** Cleanup
+
+Upon completing this lab, delete the two tables we created which are no longer needed:
+
+```sql
+DROP TABLE TxnData
+DROP TABLE StockByDate
+```
+
+___
+
+▶ [Lab: T-SQL Enhancements - Bit Functions](https://github.com/lennilobel/sql2022-workshop-hol/blob/main/HOL/1.%20T-SQL%20Enhancements/9.%20Bit%20functions.md)

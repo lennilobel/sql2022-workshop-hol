@@ -1,0 +1,141 @@
+﻿-- # IS [NOT] DISTINCT FROM Comparison Operator
+
+-- SQL Server 2022 introduces `IS [NOT] DISTINCT FROM`, an enhancement in T-SQL syntax that simplifies comparisons, including handling NULL values in comparisons, which traditionally require additional logic.
+
+USE AdventureWorks2019
+
+-- *** Simplifying NULL Comparisons
+
+-- Traditionally, comparing values in SQL, especially when NULLs are involved, can be cumbersome and unintuitive. The standard `!=` or `=` operators do not include NULLs in their comparison, necessitating additional conditions for NULL handling.
+
+-- Let's start exploring this new capability by creating the `Sample` table, and populating it five rows of data:
+
+CREATE TABLE Sample (
+    Id int IDENTITY PRIMARY KEY,
+    Value int,
+    Message nvarchar(50)
+)
+
+INSERT INTO Sample
+ (Value,  Message)  VALUES
+ (NULL,  'hello'),
+ (10,    NULL),
+ (17,    'abc'),
+ (17,    'yes'),
+ (NULL,  NULL)
+
+-- Focus on the `Value` column. Observe that one row has a `Value` of 10, two rows have a `Value` of 17, and two rows have a `Value` of NULL.
+
+-- Now let's query on that `Value` column:
+
+SELECT * FROM Sample WHERE Value != 17                        -- Ignores NULLs
+SELECT * FROM Sample WHERE Value != 17 OR Value IS NULL       -- Includes NULLs but requires additional condition
+SELECT * FROM Sample WHERE Value != 17 OR Value = NULL        -- Using = with NULL doesn't work
+
+-- Notice how `Value != 17` doesn't return NULLs, requiring an additional `OR VALUE IS NULL` check, and how `Value = NULL` also doesn't work.
+
+-- The new `IS DISTINCT FROM` syntax offers a more intuitive approach:
+
+SELECT * FROM Sample WHERE Value IS DISTINCT FROM 17          -- Like != but includes NULLs
+
+-- Now cleanup by deleting the `Sample` table:
+
+DROP TABLE Sample
+
+-- *** Usage in Data Retrieval
+
+-- In this exercise, we're using the `Sales.Orders` table in the WideWorldImporters database to illustrate the benefits of the `IS NOT DISTINCT FROM` T-SQL feature in SQL Server 2022, which is particularly useful for handling NULL values in queries.
+
+USE WideWorldImporters
+
+SELECT * FROM Sales.Orders
+
+-- Scroll the results a bit to the right to observe that the `Sales.Orders` table includes a `PickingCompletedWhen` column, documenting the datetime an order's picking was completed. Notably, out of 73,595 rows, 3,085 contain NULL values in this column:
+
+SELECT COUNT(*) FROM Sales.Orders
+SELECT COUNT(*) FROM Sales.Orders WHERE PickingCompletedWhen IS NULL
+
+-- Start by creating a non-clustered index on the `PickingCompletedWhen` column. This index improves the performance of queries that use this column, ideally using an index seek and not an index scan. Index scans are less efficient because they require SQL Server to examine every row in the index to find matches, as opposed to index seeks, which efficiently navigate the index to find the starting point of the desired data. 
+
+-- Create an index on the picking completion date
+CREATE NONCLUSTERED INDEX IDX_Orders_PickingCompletedWhen ON Sales.Orders (PickingCompletedWhen)
+
+-- Now enable the actual execution plan in SQL Server Management Studio (SSMS) to monitor SQL Server's query execution strategy. This can be done from the Query menu or by pressing `Ctrl+M`. Observing the execution plan will let you confirm the use of an index seek in queries.
+
+-- Next, we execute a parameterized query to identify all orders for a specified picking completion date. We expect to see 35 rows retrieved.
+
+-- Find all the orders for a specific picking completion date (should yield 35 rows using an index seek)
+DECLARE @dt datetime2 = '2013-01-01 12:00:00.0000000'
+
+SELECT * FROM Sales.Orders
+WHERE PickingCompletedWhen = @dt
+
+-- Check the execution plan to verify that an index seek was used for the query.
+
+-- Attempting to find orders without a picking completion date by setting `@dt` to NULL and utilizing the `=` operator returns 0 rows, rather than the 3,085 rows with NULL values.
+
+-- Using =, we get 0 rows when @dt is NULL, even though there are 3085 rows with a NULL value
+DECLARE @dt datetime2 = NULL
+
+SELECT * FROM Sales.Orders
+WHERE PickingCompletedWhen = @dt
+
+-- ***# Using ISNULL and a Predetermined Value
+
+-- One common hack is to use `ISNULL` to convert NULLs into a predetermined value, which allows the query to accommodate both NULL and non-NULL values. The following two queries are identical, and correctly handle cases where the `@dt` parameter either has a value or is set to NULL. However, this method detracts from code readability:
+
+-- Use ISNULL with predetermined value for comparing both non-NULL and NULL values (works, but requires an index scan)
+DECLARE @dt datetime2
+
+SET @dt = '2013-01-01 12:00:00.0000000'
+SELECT * FROM Sales.Orders
+WHERE ISNULL(PickingCompletedWhen, '9999-12-31 23:59:59.9999999') = ISNULL(@dt, '9999-12-31 23:59:59.9999999')
+
+
+SET @dt = NULL
+SELECT * FROM Sales.Orders
+WHERE ISNULL(PickingCompletedWhen, '9999-12-31 23:59:59.9999999') = ISNULL(@dt, '9999-12-31 23:59:59.9999999')
+
+-- Furthermore, having a look at the execution plan, you can see that this hack also results in an index scan.
+
+-- ***# Testing for Both Conditions
+
+-- Another workaround is to check for NULL and use either `PickingCompletedWhen = @dt` or `PickingCompletedWhen IS NULL` in the `WHERE` clause. This code checks for those two separate conditions: one that matches the column value with the variable `@dt` when it is not NULL, and another that specifically checks for NULL values in both the variable and the column and uses `IS NULL`:
+
+-- Use IS NULL in addition to = for comparing both non-NULL and NULL values (works, but requires an index scan)
+DECLARE @dt datetime2
+
+SET @dt = '2013-01-01 12:00:00.0000000'
+SELECT * FROM Sales.Orders
+WHERE
+    (@dt IS NOT NULL AND PickingCompletedWhen = @dt) OR
+    (@dt IS NULL AND PickingCompletedWhen IS NULL)
+
+SET @dt = NULL
+SELECT * FROM Sales.Orders
+WHERE
+    (@dt IS NOT NULL AND PickingCompletedWhen = @dt) OR
+    (@dt IS NULL AND PickingCompletedWhen IS NULL)
+
+-- Although this works and ensures that all expected rows are returned, it still leads to an index scan instead of an index seek. Confirm this by having another look at the execution plan.
+
+-- ***# Using IS [NOT] DISTINCT FROM
+
+-- Using SQL Server 2022's `IS NOT DISTINCT FROM` operator addresses both NULL and non-NULL values while maintaining efficient index seeks:
+
+-- Use IS NOT DISTINCT FROM (works for both NULL and non-NULL checks, using an index seek)
+DECLARE @dt datetime2
+
+SET @dt = '2013-01-01 12:00:00.0000000'
+SELECT * FROM Sales.Orders
+WHERE PickingCompletedWhen IS NOT DISTINCT FROM @dt
+
+SET @dt = NULL
+SELECT * FROM Sales.Orders
+WHERE PickingCompletedWhen IS NOT DISTINCT FROM @dt
+
+-- After running each query, examine the execution plan to determine whether SQL Server utilized an index seek or scan. 
+
+-- ***# Cleanup
+
+DROP INDEX Sales.Orders.IDX_Orders_PickingCompletedWhen
