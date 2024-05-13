@@ -1,7 +1,5 @@
 ﻿-- DATETRUNC Function
 
--- The `DATETRUNC` function (new in SQL Server 2022) enables truncation of date and time values to the specified part, such as year, month, day, etc. This is particularly useful for data analysis, enabling consistent date range comparisons.
-
 USE AdventureWorks2019
 
 -- *** Truncating Date Values to Quarter and Year
@@ -12,8 +10,6 @@ SELECT
     DATETRUNC(QUARTER, @d) AS TruncateToQuarter,
     DATETRUNC(YEAR, @d) AS TruncateToYear
 
--- This truncates a given date to the first day of its quarter and year, respectively, illustrating how to use `DATETRUNC` for period-based data aggregation or filtering.
-
 -- *** Truncating DateTime Values to Hour and Day
 
 DECLARE @dt datetime2 = '2023-05-17T02:04:23.1234567'
@@ -22,11 +18,7 @@ SELECT
     DATETRUNC(HOUR, @dt) AS TruncateToHour,
     DATETRUNC(DAY, @dt) AS TruncateToDay
 
--- Here, `DATETRUNC` is used to truncate a datetime value to the beginning of the specified hour and day, useful for when time-specific data granularity is needed.
-
 -- *** Comprehensive DateTime Truncation
-
--- Now run the next code snippet for a comprehensive example of all `DATETRUNC` variations:
 
 DECLARE @dt datetime2 = '2023-05-17T11:30:15.1234567' -- Wednesday
 SELECT 'FullDateTime',          @dt                          UNION ALL
@@ -42,8 +34,6 @@ SELECT 'TruncateToWeek',        DATETRUNC(WEEK, @dt)         UNION ALL	-- Week s
 SELECT 'TruncateToMonth',       DATETRUNC(MONTH, @dt)        UNION ALL
 SELECT 'TruncateToQuarter',     DATETRUNC(QUARTER, @dt)      UNION ALL
 SELECT 'TruncateToYear',        DATETRUNC(YEAR, @dt)
-
--- This example demonstrates the capability of `DATETRUNC` to truncate dates and times across a broad spectrum of components, from microseconds to years, highlighting its versatility in data processing and analysis tasks.
 
 -- Also note that, in the context of weeks, the function provides two options: `ISO_WEEK` and `WEEK`. Here's the distinction between them:
 

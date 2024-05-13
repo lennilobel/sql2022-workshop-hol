@@ -1,7 +1,5 @@
 ﻿-- STRING_SPLIT Function with Ordinal
 
--- SQL Server 2022 enhances the `STRING_SPLIT` function (first introduced in SQL Server 2016) by adding an "enable ordinal" parameter. This improvement addresses a common challenge faced when splitting strings and needing to preserve the original order of elements, which is beneficial in scenarios like data deduplication and bulk processing.
-
 USE AdventureWorks2019
 
 -- *** Basic Usage of STRING_SPLIT
@@ -11,18 +9,12 @@ USE AdventureWorks2019
 SELECT *
 FROM STRING_SPLIT('Bravo/Alpha/Tango/Delta', '/')
 
--- This example demonstrates the basic functionality available since SQL Server 2016, splitting a string into rows without *necessarily* preserving the order of elements. While the order is often preserved with a small number of items, the order is not guaranteed in all cases.
-
 -- **Enhancement in SQL Server 2022:**
 
 SELECT *
 FROM STRING_SPLIT('Bravo/Alpha/Tango/Delta', '/', 1)
 
--- The introduction of the ordinal parameter allows for the preservation of element order, by utilizing the value in the new `ordinal` column that gets returned when supplying the "enable ordinal" parameter as 1. Thus, even if the order of the rows returned does not match the order of the items supplied, the new `ordinal` column indicates the position of the item as supplied.
-
 -- *** Deduplicating Items While Preserving Order
-
--- Run this query to view the order of elements before deduplication:
 
 SELECT
     value,
@@ -30,7 +22,7 @@ SELECT
 FROM
     STRING_SPLIT('Bravo/Alpha/Bravo/Tango/Delta/Bravo/Alpha/Delta', '/', 1)
 
--- By leveraging the `MIN(ordinal)` function in combination with `GROUP BY`, we can deduplicate the elements while maintaining their original sequence:
+-- Use `MIN(ordinal)` with `GROUP BY` to dedupe while maintaining original sequence:
 
 SELECT
     value,
@@ -42,9 +34,7 @@ GROUP BY
 ORDER BY
     ordinal
 
--- Here, `GROUP BY` deduplicates the resultset, while `MIN(ordinal)` ensures that the first occurrence of any duplicate item maintains its original position.
-
--- This next query shows how the `STRING_AGG` function can then be used to reconstruct the string from the deduplicated elements, while preserving their original order.
+-- Use `STRING_AGG` to reconstruct the string from the deduplicated elements, while preserving their original order.
 
 ;WITH SplitCte AS (
     SELECT
@@ -61,10 +51,6 @@ FROM
     SplitCte
 
 -- *** Bulk Processing with Preserved Ordinal
-
--- In a scenario requiring bulk processing of rows identified by IDs supplied as a CSV string, preserving the original order of IDs is crucial for correlating results.
-
--- **Example with AdventureWorks2019:**
 
 -- First, note the three rows in the `Person.Person` table with IDs 6, 12, and 18, for Jossef, Thierry, and John:
 
@@ -96,5 +82,3 @@ FROM
     INNER JOIN BusinessEntityIDsCte AS ids ON ids.BusinessEntityID = p.BusinessEntityID
 ORDER BY
     LastName
-
--- This example underscores the utility of the enhanced `STRING_SPLIT` function in SQL Server 2022, for preserving order when splitting strings. Although the results are returned in a different order than the supplied IDs, they include an `Ordinal` column that correlates to the original order.

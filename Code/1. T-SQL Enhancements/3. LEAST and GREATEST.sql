@@ -1,14 +1,8 @@
 ﻿-- LEAST and GREATEST Functions
 
--- Exploring the `LEAST` and `GREATEST` functions introduced SQL Server 2022 shows how you can perform comparisons across columns within a single row, selecting the smallest or largest value respectively. Think of these functions like `MIN` and `MAX` respectively, only across columns rather than rows.
-
--- These functions are especially handy when dealing with different data types or when you need to compare values across multiple columns directly without resorting to case statements or complex logic.
-
 USE AdventureWorks2019
 
 -- *** Simple Example
-
--- This code snippet demonstrate the usage of `LEAST` and `GREATEST` functions with simple parameters, emphasizing automatic data type conversion.
 
 DECLARE @NumericValue1 varchar(max) = '6.62'
 DECLARE @NumericValue2 decimal(18, 4) = 3.1415
@@ -25,11 +19,7 @@ SELECT
     GreatestNumeric = GREATEST(@NumericValue1, @NumericValue2, @NumericValue3),
     GreatestString  = GREATEST(@StringValue1, @StringValue2, @StringValue3)
 
--- Note the automatic Data Type Conversion. When numeric values are passed as strings (e.g., `@NumericValue1` and `@NumericValue3`), SQL Server automatically handles the data type conversion to perform the comparison. Here both are both converted from strings to decimals before being compared with `@NumericValue2`.
-
 -- *** Comparison with Pre-2022 Approach Using CASE Statements
-
--- Before the introduction of `LEAST` and `GREATEST`, achieving similar functionality required verbose `CASE` statements, leading to more complex and less readable code. Here's the same example using the same values as before, using `CASE` to achieve the same results in earlier SQL Server versions.
 
 DECLARE @NumericValue1 varchar(max) = '6.62'
 DECLARE @NumericValue2 decimal(18, 4) = 3.1415
@@ -66,13 +56,7 @@ SELECT
       WHEN @StringValue3 > @StringValue1 AND @StringValue3 > @StringValue2 THEN @StringValue3
      END
 
--- The contrast is stark. The `LEAST` and `GREATEST` functions not only reduce the code required for such operations but also enhance clarity, making SQL scripts more maintainable and easier to understand.
-
 -- *** Scenario: Identifying Earliest and Latest Update Dates
-
--- Consider a scenario where we need to find the earliest and latest update dates across three different applications for each company. The `Company` table records these dates in separate columns, and we aim to streamline the process of identifying these key dates.
-
--- First, let's set up the `Company` table with relevant data:
 
 CREATE TABLE Company
 (
@@ -89,8 +73,6 @@ INSERT INTO Company
  ('Acme',      '2023-07-05',  '2021-12-09',  '2022-08-14'),
  ('Wonka',     '2021-03-05',  '2022-01-14',  '2023-07-26')
 
--- After populating the table with example data, we can use the `LEAST` and `GREATEST` functions to determine the earliest and latest update dates for each company:
-
 SELECT
     CompanyId,
     CompanyName,
@@ -98,14 +80,5 @@ SELECT
     LastUpdateDate   = GREATEST(UpdateByApp1, UpdateByApp2, UpdateByApp3)
 FROM
     Company
-
--- *** Insights
-
--- - **`LEAST` Function:** This function compares the dates from `UpdateByApp1`, `UpdateByApp2`, and `UpdateByApp3` for each company and returns the earliest among them as `FirstUpdateDate`. It simplifies finding the initial update across the applications.
--- - **`GREATEST` Function:** Similarly, this function finds the latest date among the three update columns for each company, identifying the most recent update as `LastUpdateDate`.
-
--- This approach negates the need for complex conditional logic, previously necessary for such comparisons, streamlining data analysis and reporting tasks. The `LEAST` and `GREATEST` functions thus offer an elegant solution to compare multiple values within a row.
-
--- *** Cleanup
 
 DROP TABLE Company
